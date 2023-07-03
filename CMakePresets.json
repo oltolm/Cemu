@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "gcc",
+            "binaryDir": "build-gcc-debug",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_VCPKG": "OFF"
+            }
+        },
+        {
+            "name": "clang",
+            "binaryDir": "build-clang-debug",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_VCPKG": "OFF"
+            }
+        },
+        {
+            "name": "msvc",
+            "binaryDir": "build-msvc",
+            "generator": "Ninja Multi-Config",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "ENABLE_VCPKG": "ON",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        }
+    ]
+}

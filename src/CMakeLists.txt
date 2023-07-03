@@ -36,12 +36,14 @@ elseif(UNIX)
 			endif()
 		endif()
 	endif()
+endif()
+
+if(NOT MSVC)
 	# warnings
 	if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		add_compile_options(-Wno-ambiguous-reversed-operator)
+		add_compile_options(-Wno-ambiguous-reversed-operator -Wno-deprecated-anon-enum-enum-conversion)
 	endif()
-
-    add_compile_options(-Wno-multichar -Wno-invalid-offsetof -Wno-switch -Wno-ignored-attributes -Wno-deprecated-enum-enum-conversion)
+	add_compile_options(-Wno-multichar -Wno-invalid-offsetof -Wno-switch -Wno-ignored-attributes -Wno-deprecated-enum-enum-conversion)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -95,9 +97,11 @@ endif()
 
 if(WIN32)
 	target_sources(CemuBin PRIVATE
-	resource/cemu.rc
-	../dist/windows/cemu.manifest
+		resource/cemu.rc
+		../dist/windows/cemu.manifest
 	)
+	target_compile_definitions(CemuBin PRIVATE UNICODE _UNICODE)
+	target_link_libraries(CemuBin PRIVATE ws2_32)
 endif()
 
 if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode")
@@ -211,10 +215,14 @@ else()
     endif()
 endif()
 
+add_custom_command(TARGET CemuBin POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/bin" "$<TARGET_FILE_DIR:CemuBin>"
+)
+
 set_target_properties(CemuBin PROPERTIES
 	# multi-configuration generators will add a config subdirectory to RUNTIME_OUTPUT_DIRECTORY if no generator expression is used
 	# to get the same behavior everywhere we append an empty generator expression
-	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin/$<1:>"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<1:>"
 	OUTPUT_NAME "${OUTPUT_NAME}"
 )
 

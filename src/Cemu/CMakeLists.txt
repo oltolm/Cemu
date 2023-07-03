@@ -52,3 +52,7 @@ target_link_libraries(CemuComponents PRIVATE
 
 # PUBLIC because fmt/format.h is included in ExpressionParser/ExpressionParser.h
 target_link_libraries(CemuComponents PUBLIC fmt::fmt)
+
+if(WIN32)
+	target_compile_definitions(CemuComponents PRIVATE UNICODE _UNICODE)
+endif()
