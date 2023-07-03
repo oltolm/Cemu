@@ -8,7 +8,7 @@ endif()
 
 if (CEMU_ASM_ARCHITECTURE MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 
-	if (WIN32)
+	if (MSVC)
 
 		enable_language(C ASM_MASM)
 
@@ -21,7 +21,10 @@ if (CEMU_ASM_ARCHITECTURE MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 		set(CMAKE_ASM_MASM_CREATE_STATIC_LIBRARY "<CMAKE_AR> /OUT:<TARGET> <LINK_FLAGS> <OBJECTS>")
 	
 		set_property(TARGET CemuAsm PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	elseif(WIN32)
+		enable_language(ASM_NASM)
 
+		add_library(CemuAsm STATIC x64util_nasm.asm)
 	else()
 
 		# NASM
