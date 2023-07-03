@@ -1,4 +1,4 @@
-add_library(CemuCafe
+add_library(CemuCafe STATIC
   Account/Account.cpp
   Account/AccountError.h
   Account/Account.h
@@ -654,5 +654,10 @@ else ()
 endif ()
 
 if(WIN32)
-	target_link_libraries(CemuCafe PRIVATE iphlpapi)
+  target_link_libraries(CemuCafe PUBLIC iphlpapi ws2_32 hid setupapi)
+  target_compile_definitions(CemuCafe PRIVATE UNICODE _UNICODE)
+  if(NOT MSVC)
+    target_compile_options(CemuCafe PRIVATE -mavx2)
+    target_compile_options(CemuCommon PUBLIC -Wno-multichar -Wno-invalid-offsetof)
+  endif()
 endif()

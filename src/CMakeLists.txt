@@ -63,9 +63,11 @@ endif()
 
 if(WIN32)
 	target_sources(CemuBin PRIVATE
-	resource/cemu.rc
-	../dist/windows/cemu.manifest
+		resource/cemu.rc
+		../dist/windows/cemu.manifest
 	)
+	target_compile_definitions(CemuBin PRIVATE UNICODE _UNICODE)
+	target_link_libraries(CemuBin PRIVATE ws2_32)
 endif()
 
 set_property(TARGET CemuBin PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -139,10 +141,14 @@ else()
     endif()
 endif()
 
+add_custom_command(TARGET CemuBin POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/bin" "$<TARGET_FILE_DIR:CemuBin>"
+)
+
 set_target_properties(CemuBin PROPERTIES
 	# multi-configuration generators will add a config subdirectory to RUNTIME_OUTPUT_DIRECTORY if no generator expression is used
 	# to get the same behavior everywhere we append an empty generator expression
-	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../bin/$<1:>"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<1:>"
 	OUTPUT_NAME "${OUTPUT_NAME}"
 )
 
