@@ -61,7 +61,7 @@ void unused_translation_dummy()
 }
 
 #if BOOST_OS_WINDOWS
-#include <shlobj_core.h>
+#include <shlobj.h>
 fs::path GetAppDataRoamingPath()
 {
 	PWSTR path = nullptr;

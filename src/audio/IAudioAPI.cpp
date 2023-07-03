@@ -2,7 +2,9 @@
 
 #if BOOST_OS_WINDOWS
 #include "XAudio2API.h"
+#ifdef _MSC_VER
 #include "XAudio27API.h"
+#endif
 #include "DirectSoundAPI.h"
 #endif
 #include "config/CemuConfig.h"
@@ -80,8 +82,10 @@ void IAudioAPI::InitializeStatic()
 #if BOOST_OS_WINDOWS
 	s_availableApis[DirectSound] = true;
 	s_availableApis[XAudio2] = XAudio2API::InitializeStatic();
+#ifdef _MSC_VER
 	if(!s_availableApis[XAudio2]) // don't try to initialize the older lib if the newer version is available
 		s_availableApis[XAudio27] = XAudio27API::InitializeStatic();
+#endif
 #endif
 #if HAS_CUBEB
 	s_availableApis[Cubeb] = CubebAPI::InitializeStatic();
@@ -145,11 +149,13 @@ AudioAPIPtr IAudioAPI::CreateDevice(AudioAPI api, const DeviceDescriptionPtr& de
 		const auto tmp = std::dynamic_pointer_cast<DirectSoundAPI::DirectSoundDeviceDescription>(device);
 		return std::make_unique<DirectSoundAPI>(tmp->GetGUID(), samplerate, channels, samples_per_block, bits_per_sample);
 	}
+#ifdef _MSC_VER
 	case XAudio27:
 	{
 		const auto tmp = std::dynamic_pointer_cast<XAudio27API::XAudio27DeviceDescription>(device);
 		return std::make_unique<XAudio27API>(tmp->GetDeviceId(), samplerate, channels, samples_per_block, bits_per_sample);
 	}
+#endif
 	case XAudio2:
 	{
 		const auto tmp = std::dynamic_pointer_cast<XAudio2API::XAudio2DeviceDescription>(device);
@@ -180,10 +186,12 @@ std::vector<IAudioAPI::DeviceDescriptionPtr> IAudioAPI::GetDevices(AudioAPI api)
 	{
 		return DirectSoundAPI::GetDevices();
 	}
+#ifdef _MSC_VER
 	case XAudio27:
 	{
 		return XAudio27API::GetDevices();
 	}
+#endif
 	case XAudio2:
 	{
 		return XAudio2API::GetDevices();
