@@ -6,7 +6,11 @@
 #include <xaudio2.h>
 
 #ifndef XAUDIO2_DLL
+#ifdef __MINGW32__
+#define XAUDIO2_DLL L"xaudio2_9.dll"
+#else
 #error wrong <xaudio2.h> included!
+#endif
 #endif
 
 #include "XAudio2API.h"

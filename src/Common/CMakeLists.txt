@@ -35,6 +35,7 @@ if(WIN32)
 		windows/FileStream_win32.cpp
 		ExceptionHandler/ExceptionHandler_win32.cpp
 	)
+  target_link_libraries(CemuCommon PUBLIC dbghelp)
 else()
 target_sources(CemuCommon
 PRIVATE
