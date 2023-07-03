@@ -1,3 +1,5 @@
+#include "wx/msw/wx.rc"
+
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource/resource.h"
