@@ -1,6 +1,7 @@
 #pragma once
 #include "Cafe/HW/Espresso/EspressoISA.h"
 #include "Cafe/HW/MMU/MMU.h"
+#include <set>
 
 bool GamePatch_IsNonReturnFunction(uint32 hleIndex);
 
