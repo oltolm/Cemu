@@ -143,6 +143,8 @@ inline uint64 _swapEndianU64(uint64 v)
 {
 #if BOOST_OS_MACOS
     return OSSwapInt64(v);
+#elif __x86_64
+    return _bswap64(v);
 #else
     return bswap_64(v);
 #endif
@@ -152,6 +154,8 @@ inline uint32 _swapEndianU32(uint32 v)
 {
 #if BOOST_OS_MACOS
     return OSSwapInt32(v);
+#elif __x86_64
+    return _bswap(v);
 #else
     return bswap_32(v);
 #endif
@@ -161,6 +165,8 @@ inline sint32 _swapEndianS32(sint32 v)
 {
 #if BOOST_OS_MACOS
     return (sint32)OSSwapInt32((uint32)v);
+#elif __x86_64
+    return (sint32)_bswap((uint32)v);
 #else
     return (sint32)bswap_32((uint32)v);
 #endif
@@ -176,6 +182,7 @@ inline sint16 _swapEndianS16(sint16 v)
     return (sint16)(((uint16)v >> 8) | ((uint16)v << 8));
 }
 
+#ifndef _WIN32
 inline uint64 _umul128(uint64 multiplier, uint64 multiplicand, uint64 *highProduct) {
     unsigned __int128 x = (unsigned __int128)multiplier * (unsigned __int128)multiplicand;
     *highProduct = (x >> 64);
@@ -198,7 +205,9 @@ typedef union _LARGE_INTEGER {
     } u;
     LONGLONG QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
+#endif
 
+#ifndef _WIN32
 #define DEFINE_ENUM_FLAG_OPERATORS(T)                                                                                                                                            \
     inline T operator~ (T a) { return static_cast<T>( ~static_cast<std::underlying_type<T>::type>(a) ); }                                                                       \
     inline T operator| (T a, T b) { return static_cast<T>( static_cast<std::underlying_type<T>::type>(a) | static_cast<std::underlying_type<T>::type>(b) ); }                   \
@@ -207,6 +216,7 @@ typedef union _LARGE_INTEGER {
     inline T& operator|= (T& a, T b) { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) |= static_cast<std::underlying_type<T>::type>(b) ); }   \
     inline T& operator&= (T& a, T b) { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) &= static_cast<std::underlying_type<T>::type>(b) ); }   \
     inline T& operator^= (T& a, T b) { return reinterpret_cast<T&>( reinterpret_cast<std::underlying_type<T>::type&>(a) ^= static_cast<std::underlying_type<T>::type>(b) ); }
+#endif
 #endif
 
 template<typename T>
@@ -249,7 +259,7 @@ inline uint64 _udiv128(uint64 highDividend, uint64 lowDividend, uint64 divisor, 
     #error Unknown compiler
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     #define DEBUG_BREAK __debugbreak()
 #else
     #include <csignal>
@@ -423,11 +433,13 @@ bool match_any_of(T1&& value, Types&&... others)
 {
 #ifdef _WIN32
     // get current time
-	static const long long _Freq = _Query_perf_frequency();	// doesn't change after system boot
-	const long long _Ctr = _Query_perf_counter();
+	static LARGE_INTEGER _Freq;
+	static BOOL b = QueryPerformanceFrequency(&_Freq); // doesn't change after system boot
+	LARGE_INTEGER _Ctr;
+    QueryPerformanceCounter(&_Ctr);
 	static_assert(std::nano::num == 1, "This assumes period::num == 1.");
-	const long long _Whole = (_Ctr / _Freq) * std::nano::den;
-	const long long _Part = (_Ctr % _Freq) * std::nano::den / _Freq;
+	const long long _Whole = (_Ctr.QuadPart / _Freq.QuadPart) * std::nano::den;
+	const long long _Part = (_Ctr.QuadPart % _Freq.QuadPart) * std::nano::den / _Freq.QuadPart;
 	return (std::chrono::high_resolution_clock::time_point(std::chrono::nanoseconds(_Whole + _Part)));
 #else
     return std::chrono::high_resolution_clock::now();
@@ -438,11 +450,13 @@ bool match_any_of(T1&& value, Types&&... others)
 {
 #if BOOST_OS_WINDOWS
     // get current time
-	static const long long _Freq = _Query_perf_frequency();	// doesn't change after system boot
-	const long long _Ctr = _Query_perf_counter();
+	static LARGE_INTEGER _Freq;
+	static BOOL b = QueryPerformanceFrequency(&_Freq); // doesn't change after system boot
+	LARGE_INTEGER _Ctr;
+	QueryPerformanceCounter(&_Ctr);
 	static_assert(std::nano::num == 1, "This assumes period::num == 1.");
-	const long long _Whole = (_Ctr / _Freq) * std::nano::den;
-	const long long _Part = (_Ctr % _Freq) * std::nano::den / _Freq;
+	const long long _Whole = (_Ctr.QuadPart / _Freq.QuadPart) * std::nano::den;
+	const long long _Part = (_Ctr.QuadPart % _Freq.QuadPart) * std::nano::den / _Freq.QuadPart;
 	return (std::chrono::steady_clock::time_point(std::chrono::nanoseconds(_Whole + _Part)));
 #elif BOOST_OS_LINUX
 	struct timespec tp;
