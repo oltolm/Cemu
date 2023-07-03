@@ -32,8 +32,8 @@ public:
 		if (!pfnD3DKMTOpenAdapterFromHdc)
 		{
 			HMODULE hModuleGDI = LoadLibraryA("gdi32.dll");
-			*(void**)&pfnD3DKMTOpenAdapterFromHdc = GetProcAddress(hModuleGDI, "D3DKMTOpenAdapterFromHdc");
-			*(void**)&pfnD3DKMTWaitForVerticalBlankEvent = GetProcAddress(hModuleGDI, "D3DKMTWaitForVerticalBlankEvent");
+			*(void**)&pfnD3DKMTOpenAdapterFromHdc = (void*)GetProcAddress(hModuleGDI, "D3DKMTOpenAdapterFromHdc");
+			*(void**)&pfnD3DKMTWaitForVerticalBlankEvent = (void*)GetProcAddress(hModuleGDI, "D3DKMTWaitForVerticalBlankEvent");
 		}
 		m_thd = std::thread(&DeviceVsyncHandler::vsyncThread, this);
 	}
