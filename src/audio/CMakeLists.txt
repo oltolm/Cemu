@@ -1,4 +1,4 @@
-add_library(CemuAudio
+add_library(CemuAudio STATIC
 	IAudioAPI.cpp
 	IAudioAPI.h
 	IAudioInputAPI.cpp
@@ -13,6 +13,13 @@ if(WIN32)
 		DirectSoundAPI.h
 		XAudio2API.cpp
 		XAudio2API.h
+	)
+	target_compile_definitions(CemuAudio PRIVATE UNICODE _UNICODE)
+	target_link_libraries(CemuAudio PUBLIC dsound winmm)
+endif()
+
+if(MSVC)
+	target_sources(CemuAudio PRIVATE
 		XAudio27API.cpp
 		XAudio27API.h
 	)

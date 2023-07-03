@@ -33,6 +33,10 @@ if(WIN32)
 		windows/FileStream_win32.cpp
 		ExceptionHandler/ExceptionHandler_win32.cpp
 	)
+  target_link_libraries(CemuCommon PUBLIC dbghelp)
+  if(NOT MSVC)
+    target_compile_options(CemuCommon PRIVATE -Wmultichar -Winvalid-offsetof)
+  endif()
 else()
 target_sources(CemuCommon
 PRIVATE
