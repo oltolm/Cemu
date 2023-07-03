@@ -59,6 +59,8 @@ if(WIN32)
 		api/DirectInput/DirectInputControllerProvider.h
 		api/DirectInput/DirectInputController.cpp
 	)
+	target_compile_definitions(CemuInput PRIVATE UNICODE _UNICODE HAS_SDL=0)
+	target_link_libraries(CemuInput PUBLIC dinput8 hid)
 endif()
 
 if (SUPPORTS_WIIMOTE)
