@@ -4,6 +4,9 @@
 #include "Cafe/OS/libs/coreinit/coreinit_Thread.h"
 #include "Cafe/OS/RPL/rpl.h"
 
+#pragma push_macro("_iob")
+#undef _iob
+
 namespace coreinit
 {
 	struct iobbuf
@@ -295,3 +298,5 @@ namespace coreinit
 		cafeExportRegister("coreinit", __tls_get_addr, LogType::Placeholder);
 	}
 };
+
+#pragma pop_macro("_iob")
