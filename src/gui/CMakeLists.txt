@@ -176,6 +176,7 @@ if (ENABLE_WXWIDGETS)
 endif()
 
 if(WIN32)
+	target_compile_definitions(CemuGui PRIVATE UNICODE _UNICODE)
 	target_link_libraries(CemuGui PRIVATE bthprops)
 endif()
 
