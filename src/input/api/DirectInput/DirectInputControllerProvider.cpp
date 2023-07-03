@@ -1,3 +1,4 @@
+#include <initguid.h>
 #include "input/api/DirectInput/DirectInputControllerProvider.h"
 
 #include "input/api/DirectInput/DirectInputController.h"
