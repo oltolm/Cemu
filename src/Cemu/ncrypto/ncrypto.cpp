@@ -343,6 +343,8 @@ namespace NCrypto
 		AES128_CBC_decrypt(key.b, m_encryptedTitleKey, 16, commonKey, iv);
 	}
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	// personalized tickets have an extra layer of encryption for the title key
 	bool ETicketParser::Depersonalize(uint8* ticketData, size_t ticketSize, uint32 deviceId, const ECCPrivKey& devicePrivKey)
 	{
@@ -736,6 +738,7 @@ namespace NCrypto
 		ECDSA_SIG_free(ecdsa_sig);
 		return r;
 	}
+#pragma GCC diagnostic pop
 
 	bool verifyCert(CertECC& cert, NCrypto::ECCPubKey& signerPubKey)
 	{

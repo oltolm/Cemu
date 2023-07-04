@@ -252,7 +252,7 @@ void TextureRelationViewerWindow::_setTextureRelationListItemTexture(wxListCtrl*
 	uiList->SetItem(rowIndex, columnIndex, tempStr);
 	columnIndex++;
 	// last access
-	sprintf(tempStr, "%ds", (GetTickCount() - texInfo->lastAccessTick + 499) / 1000);
+	sprintf(tempStr, "%lus", (GetTickCount() - texInfo->lastAccessTick + 499) / 1000);
 	uiList->SetItem(rowIndex, columnIndex, tempStr);
 	columnIndex++;
 	// overwrite resolution
