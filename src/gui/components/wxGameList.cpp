@@ -358,6 +358,8 @@ void wxGameList::SetStyle(Style style, bool save)
 	case Style::kSmallIcons:
 		wxListCtrl::SetImageList(m_image_list_small, wxIMAGE_LIST_NORMAL);
 		break;
+	case Style::kList:
+		break;
 	}
 
 	ReloadGameEntries();
