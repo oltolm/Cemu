@@ -119,14 +119,14 @@ namespace nn
 				if (!CheckTGA(pInBuffer, inSize, checkType))
 					return -1;
 				
-					uint32 compressedSize = outSize;
-					if (CompressTGA(pOutBuffer, &compressedSize, pInBuffer, inSize))
-						return compressedSize;
-					else
-					{
-						cemuLog_log(LogType::Force, "OLIVE compress error.\n");
-						return -1;
-					}
+				uint32 compressedSize = outSize;
+				if (CompressTGA(pOutBuffer, &compressedSize, pInBuffer, inSize))
+					return compressedSize;
+				else
+				{
+					cemuLog_log(LogType::Force, "OLIVE compress error.\n");
+					return -1;
+				}
 			}
 			else
 			{
