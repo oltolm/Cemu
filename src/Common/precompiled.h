@@ -578,17 +578,17 @@ inline uint32 GetTitleIdLow(uint64 titleId)
 void DebugLogStackTrace(struct OSThread_t* thread, MPTR sp, bool printSymbols = false);
 
 // generic formatter for enums (to underlying)
-template <typename Enum>
-	requires std::is_enum_v<Enum>
-struct fmt::formatter<Enum> : fmt::formatter<underlying_t<Enum>>
-{
-	auto format(const Enum& e, format_context& ctx) const
-	{
-		//return fmt::format_to(ctx.out(), "{}", fmt::underlying(e));
+// template <typename Enum>
+// 	requires std::is_enum_v<Enum>
+// struct fmt::formatter<Enum> : fmt::formatter<underlying_t<Enum>>
+// {
+// 	auto format(const Enum& e, format_context& ctx) const
+// 	{
+// 		//return fmt::format_to(ctx.out(), "{}", fmt::underlying(e));
 
-		return formatter<underlying_t<Enum>>::format(fmt::underlying(e), ctx);
-	}
-};
+// 		return formatter<underlying_t<Enum>>::format(fmt::underlying(e), ctx);
+// 	}
+// };
 
 // formatter for betype<T>
 template <typename T>

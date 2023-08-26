@@ -1,6 +1,8 @@
 #pragma once
 #include "Cafe/HW/Latte/Core/LatteConst.h"
 
+using fmt::enums::format_as;
+
 namespace Latte
 {
 	using GPRType = uint8;

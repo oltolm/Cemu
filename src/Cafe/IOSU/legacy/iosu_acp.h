@@ -2,6 +2,7 @@
 
 #include "Cafe/IOSU/iosu_types_common.h"
 #include "Cafe/OS/libs/nn_common.h" // for nnResult
+#include <fmt/format.h>
 
 typedef struct
 {
@@ -198,6 +199,8 @@ namespace iosu
 
 	namespace acp
 	{
+		using fmt::enums::format_as;
+
 		enum ACPDeviceType
 		{
 			UnknownType = 0,

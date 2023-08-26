@@ -1,6 +1,8 @@
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h"
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h"
 
+using fmt::enums::format_as;
+
 struct CopyShaderPushConstantData_t
 {
 	float vertexOffsets[4 * 2];

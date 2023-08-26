@@ -4,6 +4,8 @@
 
 namespace InputAPI
 {
+	using fmt::enums::format_as;
+
 	enum Type
 	{
 		Keyboard,

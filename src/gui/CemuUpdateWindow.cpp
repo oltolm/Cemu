@@ -21,6 +21,7 @@
 #include <zip.h>
 #include <boost/tokenizer.hpp>
 
+using fmt::enums::format_as;
 
 wxDECLARE_EVENT(wxEVT_RESULT, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_RESULT, wxCommandEvent);

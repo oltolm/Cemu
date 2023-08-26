@@ -1,5 +1,7 @@
 #pragma once
 
+using fmt::enums::format_as;
+
 class IAudioInputAPI
 {
 	friend class GeneralSettings2;

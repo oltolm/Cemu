@@ -2,6 +2,8 @@
 #include "Cafe/HW/Espresso/Const.h"
 #include "Cafe/OS/libs/coreinit/coreinit_Scheduler.h"
 
+using fmt::enums::format_as;
+
 struct OSThread_t;
 
 struct OSContextRegFPSCR_t
@@ -92,6 +94,7 @@ static_assert(sizeof(crt_t) == 0x1D8, "");
 
 namespace coreinit
 {
+	using fmt::enums::format_as;
 
 	/********* OSThreadQueue *********/
 

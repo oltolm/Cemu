@@ -5,6 +5,8 @@ namespace nn
 {
 namespace acp
 {
+	using fmt::enums::format_as;
+
 	enum ACPStatus : uint32
 	{
 		SUCCESS = 0,

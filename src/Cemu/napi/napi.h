@@ -14,6 +14,8 @@ enum class NAPI_RESULT
 
 namespace NAPI
 {
+	using fmt::enums::format_as;
+
 	// common auth info structure shared by ACT, ECS and IAS service
 	struct AuthInfo
 	{

@@ -1,6 +1,8 @@
 
 namespace proc_ui
 {
+	using fmt::enums::format_as;
+
 	enum class ProcUIStatus
 	{
 		Foreground = 0,

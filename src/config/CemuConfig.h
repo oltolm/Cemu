@@ -8,6 +8,8 @@
 #include <wx/language.h>
 #include <wx/intl.h>
 
+using fmt::enums::format_as;
+
 enum class NetworkService;
 
 struct GameEntry
@@ -278,7 +280,7 @@ struct fmt::formatter<CafeConsoleRegion> : formatter<string_view> {
 template <>
 struct fmt::formatter<CafeConsoleLanguage> : formatter<string_view> {
 	template <typename FormatContext>
-	auto format(const CafeConsoleLanguage v, FormatContext &ctx) {
+	auto format(const CafeConsoleLanguage v, FormatContext &ctx) const {
 		string_view name;
 		switch (v)
 		{
@@ -304,7 +306,7 @@ struct fmt::formatter<CafeConsoleLanguage> : formatter<string_view> {
 template <>
 struct fmt::formatter<CrashDump> : formatter<string_view> {
 	template <typename FormatContext>
-	auto format(const CrashDump v, FormatContext &ctx) {
+	auto format(const CrashDump v, FormatContext &ctx) const {
 		string_view name;
 		switch (v)
 		{
@@ -319,7 +321,7 @@ struct fmt::formatter<CrashDump> : formatter<string_view> {
 };
 #elif BOOST_OS_UNIX
 template <>
-struct fmt::formatter<CrashDump> : formatter<string_view> {
+struct fmt::formatter<CrashDump> : formatter<string_view> const {
 	template <typename FormatContext>
 	auto format(const CrashDump v, FormatContext &ctx) {
 		string_view name;

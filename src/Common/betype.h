@@ -229,6 +229,12 @@ private:
 	T m_value;
 };
 
+template<typename T>
+T format_as(betype<T> value)
+{
+	return value.value();
+}
+
 using uint64be = betype<uint64>;
 using uint32be = betype<uint32>;
 using uint16be = betype<uint16>;

@@ -14,6 +14,8 @@ namespace nn
 	typedef uint32 Result;
 namespace boss
 {
+	using fmt::enums::format_as;
+
 #define bossPrepareRequest() \
 StackAllocator<iosuBossCemuRequest_t> _buf_bossRequest; \
 StackAllocator<ioBufferVector_t> _buf_bufferVector; \

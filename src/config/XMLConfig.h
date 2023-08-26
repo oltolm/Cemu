@@ -7,6 +7,11 @@
 #include <mutex>
 #include <pugixml.hpp>
 
+namespace pugi
+{
+	using fmt::enums::format_as;
+}
+
 class XMLConfigParser
 {
 public:
@@ -334,7 +339,7 @@ public:
 		const bool success = error.status == pugi::status_ok;
 		if (error != 0)
 		{
-			cemuLog_logDebug(LogType::Force, "XMLConfig::Load > LoadFile {}", error);
+			cemuLog_logDebug(LogType::Force, "XMLConfig::Load > LoadFile {}", error.status);
 		}
 		if (success)
 		{

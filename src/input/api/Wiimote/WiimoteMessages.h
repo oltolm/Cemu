@@ -2,6 +2,8 @@
 
 // https://wiibrew.org/wiki/Wiimote
 
+using fmt::enums::format_as;
+
 enum InputReportId : uint8
 {
 	kNone = 0,

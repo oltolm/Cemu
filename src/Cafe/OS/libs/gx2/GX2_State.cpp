@@ -7,6 +7,7 @@
 
 namespace GX2
 {
+	using fmt::enums::format_as;
 	using namespace Latte;
 
 	void GX2InitAlphaTestReg(GX2AlphaTestReg* reg, uint32 alphaTestEnable, GX2_ALPHAFUNC alphaFunc, float alphaRef)
