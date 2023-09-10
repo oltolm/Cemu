@@ -302,64 +302,64 @@ MainWindow::MainWindow()
 #endif
 
 	auto* main_sizer = new wxBoxSizer(wxVERTICAL);
-    auto load_file = LaunchSettings::GetLoadFile();
-    auto load_title_id = LaunchSettings::GetLoadTitleID();
-    bool quick_launch = false;
+	auto load_file = LaunchSettings::GetLoadFile();
+	auto load_title_id = LaunchSettings::GetLoadTitleID();
+	bool quick_launch = false;
 
-    if (load_file)
-    {
-        MainWindow::RequestLaunchGame(load_file.value(), wxLaunchGameEvent::INITIATED_BY::COMMAND_LINE);
-        quick_launch = true;
-    }
-    else if (load_title_id)
-    {
-        TitleInfo info;
-        TitleId baseId;
-        if (CafeTitleList::FindBaseTitleId(load_title_id.value(), baseId) && CafeTitleList::GetFirstByTitleId(baseId, info))
-        {
-            MainWindow::RequestLaunchGame(info.GetPath(), wxLaunchGameEvent::INITIATED_BY::COMMAND_LINE);
-            quick_launch = true;
-        }
-        else
-        {
-            wxString errorMsg = fmt::format("Title ID {:016x} not found", load_title_id.value());
-            wxMessageBox(errorMsg, _("Error"), wxOK | wxCENTRE | wxICON_ERROR);
+	if (load_file)
+	{
+		MainWindow::RequestLaunchGame(load_file.value(), wxLaunchGameEvent::INITIATED_BY::COMMAND_LINE);
+		quick_launch = true;
+	}
+	else if (load_title_id)
+	{
+		TitleInfo info;
+		TitleId baseId;
+		if (CafeTitleList::FindBaseTitleId(load_title_id.value(), baseId) && CafeTitleList::GetFirstByTitleId(baseId, info))
+		{
+			MainWindow::RequestLaunchGame(info.GetPath(), wxLaunchGameEvent::INITIATED_BY::COMMAND_LINE);
+			quick_launch = true;
+		}
+		else
+		{
+			wxString errorMsg = fmt::format("Title ID {:016x} not found", load_title_id.value());
+			wxMessageBox(errorMsg, _("Error"), wxOK | wxCENTRE | wxICON_ERROR);
 
-        }
-    }
-    SetSizer(main_sizer);
-    if (!quick_launch)
-    {
-        CreateGameListAndStatusBar();
-    }
-    else
-    {
-      // launching game via -g or -t option. Don't set up or load game list
-      m_game_list = nullptr;
-      m_info_bar = nullptr;
-    }
-    SetSizer(main_sizer);
+		}
+	}
+	SetSizer(main_sizer);
+	if (!quick_launch)
+	{
+		CreateGameListAndStatusBar();
+	}
+	else
+	{
+	  // launching game via -g or -t option. Don't set up or load game list
+	  m_game_list = nullptr;
+	  m_info_bar = nullptr;
+	}
+	SetSizer(main_sizer);
 
-    m_last_mouse_move_time = std::chrono::steady_clock::now();
+	m_last_mouse_move_time = std::chrono::steady_clock::now();
 
-    m_timer = new wxTimer(this, MAINFRAME_ID_TIMER1);
-    m_timer->Start(500);
+	m_timer = new wxTimer(this, MAINFRAME_ID_TIMER1);
+	m_timer->Start(500);
 
-    LoadSettings();
+	LoadSettings();
 
-    auto& config = GetConfig();
-    #ifdef ENABLE_DISCORD_RPC
-    if (config.use_discord_presence)
-            m_discord = std::make_unique<DiscordPresence>();
-    #endif
+	auto& config = GetConfig();
+	#ifdef ENABLE_DISCORD_RPC
+	if (config.use_discord_presence)
+			m_discord = std::make_unique<DiscordPresence>();
+	#endif
 
-    Bind(wxEVT_OPEN_GRAPHIC_PACK, &MainWindow::OnGraphicWindowOpen, this);
-    Bind(wxEVT_LAUNCH_GAME, &MainWindow::OnLaunchFromFile, this);
+	Bind(wxEVT_OPEN_GRAPHIC_PACK, &MainWindow::OnGraphicWindowOpen, this);
+	Bind(wxEVT_LAUNCH_GAME, &MainWindow::OnLaunchFromFile, this);
 
-    if (LaunchSettings::GDBStubEnabled())
-    {
-            g_gdbstub = std::make_unique<GDBServer>(config.gdb_port);
-    }
+	if (LaunchSettings::GDBStubEnabled())
+	{
+			g_gdbstub = std::make_unique<GDBServer>(config.gdb_port);
+	}
 }
 
 MainWindow::~MainWindow()
@@ -378,36 +378,36 @@ MainWindow::~MainWindow()
 
 void MainWindow::CreateGameListAndStatusBar()
 {
-    if(m_main_panel)
-        return; // already displayed
-    m_main_panel = new wxPanel(this);
-    auto* sizer = new wxBoxSizer(wxVERTICAL);
-    // game list
-    m_game_list = new wxGameList(m_main_panel, MAINFRAME_GAMELIST_ID);
-    m_game_list->Bind(wxEVT_OPEN_SETTINGS, [this](auto&) {OpenSettings(); });
-    m_game_list->SetDropTarget(new wxGameDropTarget(this));
-    sizer->Add(m_game_list, 1, wxEXPAND);
+	if(m_main_panel)
+		return; // already displayed
+	m_main_panel = new wxPanel(this);
+	auto* sizer = new wxBoxSizer(wxVERTICAL);
+	// game list
+	m_game_list = new wxGameList(m_main_panel, MAINFRAME_GAMELIST_ID);
+	m_game_list->Bind(wxEVT_OPEN_SETTINGS, [this](auto&) {OpenSettings(); });
+	m_game_list->SetDropTarget(new wxGameDropTarget(this));
+	sizer->Add(m_game_list, 1, wxEXPAND);
 
-    // info, warning bar
-    m_info_bar = new wxInfoBar(m_main_panel);
-    m_info_bar->SetShowHideEffects(wxSHOW_EFFECT_BLEND, wxSHOW_EFFECT_BLEND);
-    m_info_bar->SetEffectDuration(500);
-    sizer->Add(m_info_bar, 0, wxALL | wxEXPAND, 5);
+	// info, warning bar
+	m_info_bar = new wxInfoBar(m_main_panel);
+	m_info_bar->SetShowHideEffects(wxSHOW_EFFECT_BLEND, wxSHOW_EFFECT_BLEND);
+	m_info_bar->SetEffectDuration(500);
+	sizer->Add(m_info_bar, 0, wxALL | wxEXPAND, 5);
 
-    m_main_panel->SetSizer(sizer);
+	m_main_panel->SetSizer(sizer);
 
-    auto* main_sizer = this->GetSizer();
-    main_sizer->Add(m_main_panel, 1, wxEXPAND, 0, nullptr);
+	auto* main_sizer = this->GetSizer();
+	main_sizer->Add(m_main_panel, 1, wxEXPAND, 0, nullptr);
 }
 
 void MainWindow::DestroyGameListAndStatusBar()
 {
-    if(!m_main_panel)
-        return;
-    m_main_panel->Destroy();
-    m_main_panel = nullptr;
-    m_game_list = nullptr;
-    m_info_bar = nullptr;
+	if(!m_main_panel)
+		return;
+	m_main_panel->Destroy();
+	m_main_panel = nullptr;
+	m_game_list = nullptr;
+	m_info_bar = nullptr;
 }
 
 wxString MainWindow::GetInitialWindowTitle()
@@ -430,7 +430,7 @@ void MainWindow::OnClose(wxCloseEvent& event)
 
 	event.Skip();
 
-    CafeSystem::Shutdown();
+	CafeSystem::Shutdown();
 	DestroyCanvas();
 }
 
@@ -562,7 +562,7 @@ bool MainWindow::FileLoad(const fs::path launchPath, wxLaunchGameEvent::INITIATE
 
 	wxWindowUpdateLocker lock(this);
 
-    DestroyGameListAndStatusBar();
+	DestroyGameListAndStatusBar();
 
 	m_game_launched = true;
 	m_loadMenuItem->Enable(false);
@@ -586,21 +586,21 @@ bool MainWindow::FileLoad(const fs::path launchPath, wxLaunchGameEvent::INITIATE
 	if (ActiveSettings::FullscreenEnabled())
 		SetFullScreen(true);
 
-    //GameMode support
+	//GameMode support
 #if BOOST_OS_LINUX && defined(ENABLE_FERAL_GAMEMODE)
-    if(GetConfig().feral_gamemode)
-    {
-        // attempt to start gamemode
-        if(gamemode_request_start() < 0)
-        {
-            // GameMode failed to start
-            cemuLog_log(LogType::Force, "Could not start GameMode");
-        }
-        else
-        {
-            cemuLog_log(LogType::Force, "GameMode has been started.");
-        }
-    }
+	if(GetConfig().feral_gamemode)
+	{
+		// attempt to start gamemode
+		if(gamemode_request_start() < 0)
+		{
+			// GameMode failed to start
+			cemuLog_log(LogType::Force, "Could not start GameMode");
+		}
+		else
+		{
+			cemuLog_log(LogType::Force, "GameMode has been started.");
+		}
+	}
 #endif
 
 	CreateCanvas();
@@ -661,12 +661,12 @@ void MainWindow::OnFileMenu(wxCommandEvent& event)
 	}
 	else if (menuId == MAINFRAME_MENU_ID_FILE_END_EMULATION)
 	{
-        CafeSystem::ShutdownTitle();
+		CafeSystem::ShutdownTitle();
 		DestroyCanvas();
 		m_game_launched = false;
 		RecreateMenu();
-        CreateGameListAndStatusBar();
-        DoLayout();
+		CreateGameListAndStatusBar();
+		DoLayout();
 		UpdateChildWindowTitleRunningState();
 	}
 }
@@ -1551,19 +1551,19 @@ void MainWindow::AsyncSetTitle(std::string_view windowTitle)
 
 void MainWindow::CreateCanvas()
 {
-    // create panel for canvas
-    m_game_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxWANTS_CHARS);
-    auto* sizer = new wxBoxSizer(wxVERTICAL);
+	// create panel for canvas
+	m_game_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxWANTS_CHARS);
+	auto* sizer = new wxBoxSizer(wxVERTICAL);
 
-    // shouldn't be needed, but who knows
-    m_game_panel->Bind(wxEVT_KEY_UP, &MainWindow::OnKeyUp, this);
-    m_game_panel->Bind(wxEVT_CHAR, &MainWindow::OnChar, this);
+	// shouldn't be needed, but who knows
+	m_game_panel->Bind(wxEVT_KEY_UP, &MainWindow::OnKeyUp, this);
+	m_game_panel->Bind(wxEVT_CHAR, &MainWindow::OnChar, this);
 
-    m_game_panel->SetSizer(sizer);
-    this->GetSizer()->Add(m_game_panel, 1, wxEXPAND, 0, nullptr);
+	m_game_panel->SetSizer(sizer);
+	this->GetSizer()->Add(m_game_panel, 1, wxEXPAND, 0, nullptr);
 
-    // create canvas
-    if (ActiveSettings::GetGraphicsAPI() == kVulkan)
+	// create canvas
+	if (ActiveSettings::GetGraphicsAPI() == kVulkan)
 		m_render_canvas = new VulkanCanvas(m_game_panel, wxSize(1280, 720), true);
 	else
 		m_render_canvas = GLCanvas_Create(m_game_panel, wxSize(1280, 720), true);
@@ -1604,11 +1604,11 @@ void MainWindow::DestroyCanvas()
 		m_render_canvas->Destroy();
 		m_render_canvas = nullptr;
 	}
-    if(m_game_panel)
-    {
-        m_game_panel->Destroy();
-        m_game_panel = nullptr;
-    }
+	if(m_game_panel)
+	{
+		m_game_panel->Destroy();
+		m_game_panel = nullptr;
+	}
 }
 
 void MainWindow::OnSizeEvent(wxSizeEvent& event)
