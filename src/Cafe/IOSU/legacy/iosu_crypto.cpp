@@ -141,6 +141,8 @@ std::string iosuCrypto_base64Encode(unsigned char const* bytes_to_encode, unsign
 }
 static_assert(sizeof(CertECC_t) == sizeof(CertECC_t));
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 EC_KEY* ECCPubKey_getPublicKey(ECCPubKey& pubKey) // verified and works
 {
 	BIGNUM* bn_r = BN_new();
@@ -403,6 +405,7 @@ bool iosuCrypto_addClientCertificate(void* sslctx, sint32 certificateId)
 	cemuLog_log(LogType::Force, "Certificate not found (verify required files for online mode or disable online mode)");
 	return false;
 }
+#pragma GCC diagnostic pop
 
 bool iosuCrypto_addCACertificate(void* sslctx, sint32 certificateId)
 {
