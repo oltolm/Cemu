@@ -30,9 +30,6 @@ DirectInputControllerProvider::DirectInputControllerProvider()
 
 DirectInputControllerProvider::~DirectInputControllerProvider()
 {
-	if (m_dinput8)
-		m_dinput8->Release();
-	
 	/*if (m_module)
 		FreeLibrary(m_module);
 	*/

@@ -15,33 +15,6 @@ DirectInputController::DirectInputController(const GUID& guid, std::string_view 
 
 DirectInputController::~DirectInputController()
 {
-	if (m_effect)
-		m_effect->Release();
-	
-	if (m_device)
-	{
-		m_device->Unacquire();
-
-		// TODO: test if really needed
-		// workaround for gamecube controllers crash on release?
-		bool should_release_device = true;
-		if (m_product_guid == GUID{}) {
-			DIDEVICEINSTANCE info{};
-			info.dwSize = sizeof(DIDEVICEINSTANCE);
-			if (SUCCEEDED(m_device->GetDeviceInfo(&info)))
-			{
-				m_product_guid = info.guidProduct;
-			}
-		}
-
-		// info.guidProduct = {18440079-0000-0000-0000-504944564944}
-		constexpr GUID kGameCubeController = { 0x18440079, 0, 0, {0,0,0x50,0x49,0x44,0x56,0x49,0x44} };
-		if (kGameCubeController == m_product_guid)
-			should_release_device = false;
-
-		if (should_release_device)
-			m_device->Release();
-	}
 }
 
 void DirectInputController::save(pugi::xml_node& node)
@@ -104,7 +77,6 @@ bool DirectInputController::connect()
 	// set data format
 	if (FAILED(m_device->SetDataFormat(m_provider->get_data_format())))
 	{
-		SAFE_RELEASE(m_device);
 		return false;
 	}
 
@@ -115,7 +87,6 @@ bool DirectInputController::connect()
 	{
 		if (FAILED(m_device->SetCooperativeLevel(hwndMainWindow, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE)))
 		{
-			SAFE_RELEASE(m_device);
 			return false;
 		}
 		// rumble can only be used with exclusive access
