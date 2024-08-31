@@ -1,21 +1,17 @@
 #pragma once
 
-#include "util/tinyxml2/tinyxml2.h"
 #include "Common/FileStream.h"
 #include "config/ConfigValue.h"
 
 #include <string>
 #include <mutex>
+#include <pugixml.hpp>
 
 class XMLConfigParser
 {
 public:
-	XMLConfigParser(tinyxml2::XMLDocument* document)
-		: m_document(document), m_current_element(nullptr), m_is_root(true) {}
-
-private:
-	XMLConfigParser(tinyxml2::XMLDocument* document, tinyxml2::XMLElement* element)
-		: m_document(document), m_current_element(element), m_is_root(false) {}
+	XMLConfigParser(pugi::xml_node element)
+		: m_current_element(element) {}
 
 public:
 	template <typename T>
@@ -24,28 +20,26 @@ public:
 		if constexpr(std::is_enum_v<T>)
 			return static_cast<T>(get(name, static_cast<std::underlying_type_t<T>>(default_value)));
 
-		const auto* element = m_current_element
-			? m_current_element->FirstChildElement(name)
-			: m_document->FirstChildElement(name);
+		const auto element = m_current_element.child(name);
 		
 		if (element == nullptr)
 			return default_value;
 
 		if constexpr (std::is_same_v<T, bool>)
-			return element->BoolText(default_value);
+			return element.text().as_bool(default_value);
 		else if constexpr (std::is_same_v<T, float>)
-			return element->FloatText(default_value);
+			return element.text().as_float(default_value);
 		else if constexpr (std::is_same_v<T, sint32>)
-			return element->IntText(default_value);
+			return element.text().as_int(default_value);
 		else if constexpr (std::is_same_v<T, uint32>)
-			return element->UnsignedText(default_value);
+			return element.text().as_uint(default_value);
 		else if constexpr (std::is_same_v<T, sint64>)
-			return element->Int64Text(default_value);
-		else if constexpr (std::is_same_v<T, uint64>) // doesnt support real uint64...
-			return (uint64)element->Int64Text((sint64)default_value);
+			return element.text().as_llong(default_value);
+		else if constexpr (std::is_same_v<T, uint64>)
+			return element.text().as_ullong(default_value);
 		else if constexpr (std::is_same_v<T, const char*> || std::is_same_v<T, std::string>)
 		{
-			const char* text = element->GetText();
+			const char* text = element.text().get();
 			return text ? text : default_value;
 		}
 		
@@ -74,20 +68,20 @@ public:
 			return default_value;
 
 		if constexpr (std::is_same_v<T, bool>)
-			return m_current_element->BoolAttribute(name, default_value);
+			return m_current_element.attribute(name).as_bool(default_value);
 		else if constexpr (std::is_same_v<T, float>)
-			return m_current_element->FloatAttribute(name, default_value);
+			return m_current_element.attribute(name).as_float(default_value);
 		else if constexpr (std::is_same_v<T, sint32>)
-			return m_current_element->IntAttribute(name, default_value);
+			return m_current_element.attribute(name).as_int(default_value);
 		else if constexpr (std::is_same_v<T, uint32>)
-			return m_current_element->UnsignedAttribute(name, default_value);
+			return m_current_element.attribute(name).as_uint(default_value);
 		else if constexpr (std::is_same_v<T, sint64>)
-			return m_current_element->Int64Attribute(name, default_value);
+			return m_current_element.attribute(name).as_llong(default_value);
 		else if constexpr (std::is_same_v<T, uint64>) // doesnt support real uint64...
-			return (uint64)m_current_element->Int64Attribute(name, (sint64)default_value);
+			return (uint64)m_current_element.attribute(name).as_ullong(default_value);
 		else if constexpr (std::is_same_v<T, const char*> || std::is_same_v<T, std::string>)
 		{
-			const char* text = m_current_element->Attribute(name);
+			const char* text = m_current_element.attribute(name).as_string();
 			return text ? text : default_value;
 		}
 
@@ -121,13 +115,11 @@ public:
 	std::array<TType, TSize>& get(const char* name, std::array<TType, TSize>& arr)
 	{
 		arr = {};
-		const auto element = m_current_element
-			                     ? m_current_element->FirstChildElement(name)
-			                     : m_document->FirstChildElement(name);
+		const auto element = m_current_element.child(name);
 		if (element == nullptr)
 			return arr;
 
-		const char* text = element->GetText();
+		const char* text = element.text().as_string();
 		if(text)
 		{
 			assert(strlen(text) == (arr.size() * 2));
@@ -150,45 +142,45 @@ public:
 
 	bool value(bool default_value)
 	{
-		return m_current_element ? m_current_element->BoolText(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_bool(default_value) : default_value;
 	}
 
 	float value(float default_value)
 	{
-		return m_current_element ? m_current_element->FloatText(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_float(default_value) : default_value;
 	}
 
 	double value(double default_value)
 	{
-		return m_current_element ? m_current_element->DoubleText(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_double(default_value) : default_value;
 	}
 
 	uint32 value(uint32 default_value)
 	{
-		return m_current_element ? m_current_element->UnsignedText(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_uint(default_value) : default_value;
 	}
 
 	sint32 value(sint32 default_value)
 	{
-		return m_current_element ? m_current_element->IntText(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_int(default_value) : default_value;
 	}
 
 	uint64 value(uint64 default_value)
 	{
-		return m_current_element ? (uint64)m_current_element->Int64Text(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_ullong(default_value) : default_value;
 	}
 
 	sint64 value(sint64 default_value)
 	{
-		return m_current_element ? m_current_element->Int64Text(default_value) : default_value;
+		return m_current_element ? m_current_element.text().as_llong(default_value) : default_value;
 	}
 
 	const char* value(const char* default_value)
 	{
 		if (m_current_element)
 		{
-			if (m_current_element->GetText())
-				return m_current_element->GetText();
+			if (m_current_element.text())
+				return m_current_element.text().as_string();
 		}
 
 		return default_value;
@@ -197,7 +189,7 @@ public:
 	template <typename TType, size_t TSize>
 	void set(const char* name, const std::array<TType, TSize>& value)
 	{
-		auto element = m_document->NewElement(name);
+		auto element = m_current_element.append_child(name);
 
 		std::stringstream str;
 		for(const auto& v : value)
@@ -205,28 +197,18 @@ public:
 			str << fmt::format("{:02x}", v);
 		}
 
-		element->SetText(str.str().c_str());
-
-		if (m_current_element)
-			m_current_element->InsertEndChild(element);
-		else
-			m_document->InsertEndChild(element);
+		element.text().set(str.str().c_str());
 	}
 
 	template <typename T>
 	void set(const char* name, T value)
 	{
-		auto* element = m_document->NewElement(name);
+		auto element = m_current_element.append_child(name);
 
 		if constexpr (std::is_enum<T>::value)
-			element->SetText(fmt::format("{}", static_cast<typename std::underlying_type<T>::type>(value)).c_str());
+			element.text().set(fmt::format("{}", static_cast<typename std::underlying_type<T>::type>(value)).c_str());
 		else
-			element->SetText(fmt::format("{}", value).c_str());
-
-		if (m_current_element)
-			m_current_element->InsertEndChild(element);
-		else
-			m_document->InsertEndChild(element);
+			element.text().set(fmt::format("{}", value).c_str());
 	}
 
 	template <typename T>
@@ -246,33 +228,25 @@ public:
 		set(name, (sint64)value);
 	}
 
-	tinyxml2::XMLElement* GetCurrentElement() const { return m_current_element; }
+	pugi::xml_node GetCurrentElement() const { return m_current_element; }
 
 	XMLConfigParser get(const char* name) const
 	{
-		const auto element = m_current_element
-			                     ? m_current_element->FirstChildElement(name)
-			                     : m_document->FirstChildElement(name);
-		return {m_document, element};
+		auto element = m_current_element.child(name);
+		return {element};
 	}
 
 	XMLConfigParser get(const char* name, const XMLConfigParser& parser)
 	{
-		const auto element = parser.m_current_element
-			? parser.m_current_element->NextSiblingElement(name)
-			: parser.m_document->NextSiblingElement(name);
-		return { m_document, element };
+		auto element = parser.m_current_element.next_sibling(name);
+		return {element};
 	}
 
-	XMLConfigParser set(const char* name) const
+	XMLConfigParser set(const char* name)
 	{
-		const auto element = m_document->NewElement(name);
-		if (m_current_element)
-			m_current_element->InsertEndChild(element);
-		else
-			m_document->InsertEndChild(element);
+		auto element = m_current_element.append_child(name);
 
-		return {m_document, element};
+		return {element};
 	}
 
 	template <typename T>
@@ -280,7 +254,7 @@ public:
 	{
 		cemu_assert_debug(m_current_element != nullptr);
 		if (m_current_element)
-			m_current_element->SetAttribute(name, value);
+			m_current_element.append_attribute(name).set_value(value);
 		
 		return *this;
 	}
@@ -305,16 +279,11 @@ public:
 
 	bool valid() const
 	{
-		if (m_is_root)
-			return m_document != nullptr;
-
-		return m_document != nullptr && m_current_element != nullptr;
+		return m_current_element != nullptr;
 	}
 
 private:
-	tinyxml2::XMLDocument* m_document;
-	tinyxml2::XMLElement* m_current_element;
-	bool m_is_root;
+	pugi::xml_node m_current_element;
 };
 
 template <typename T, void(T::*L)(XMLConfigParser&) = nullptr, void(T::*S)(XMLConfigParser&) = nullptr>
@@ -360,16 +329,16 @@ public:
 		fs->readData(xmlData.data(), xmlData.size());
 		delete fs;
 
-		tinyxml2::XMLDocument doc;		
-		const tinyxml2::XMLError error = doc.Parse((const char*)xmlData.data(), xmlData.size());
-		const bool success = error == tinyxml2::XML_SUCCESS;
+		pugi::xml_document doc;
+		const pugi::xml_parse_result error = doc.load_buffer((const char*)xmlData.data(), xmlData.size());
+		const bool success = error.status == pugi::status_ok;
 		if (error != 0)
 		{
 			cemuLog_logDebug(LogType::Force, "XMLConfig::Load > LoadFile {}", error);
 		}
 		if (success)
 		{
-			auto parser = XMLConfigParser(&doc);
+			auto parser = XMLConfigParser(doc);
 			(m_instance.*L)(parser);
 		}
 		return true;
@@ -412,15 +381,19 @@ public:
             return false;
         }
 
-		tinyxml2::XMLDocument doc;
-		const auto declaration = doc.NewDeclaration();
-		doc.InsertFirstChild(declaration);
+		pugi::xml_document doc;
+		auto declaration = doc.prepend_child(pugi::node_declaration);
+		declaration.append_attribute("version") = "1.0";
+		declaration.append_attribute("encoding") = "UTF-8";
 
-		auto parser = XMLConfigParser(&doc);
+		auto parser = XMLConfigParser(doc);
 		(m_instance.*S)(parser);
 
-		const tinyxml2::XMLError error = doc.SaveFile(file);
-		const bool success = error == tinyxml2::XML_SUCCESS;
+		pugi::xml_writer_file writer(file);
+
+		doc.save(writer);
+		const int error = 0;
+		const bool success = true;
 		if(error != 0)
 			cemuLog_logDebug(LogType::Force, "XMLConfig::Save > SaveFile {}", error);
 

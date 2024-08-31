@@ -1,7 +1,6 @@
 #include "iosu_ioctl.h"
 #include "iosu_acp.h"
 #include "Cafe/OS/libs/nn_common.h"
-#include "util/tinyxml2/tinyxml2.h"
 #include "Cafe/OS/libs/coreinit/coreinit_Time.h"
 #include "Cafe/OS/libs/nn_save/nn_save.h"
 #include "util/helpers/helpers.h"
@@ -9,6 +8,7 @@
 #include "Cafe/OS/libs/coreinit/coreinit_FS.h"
 #include "Cafe/Filesystem/fsc.h"
 //#include "Cafe/HW/Espresso/PPCState.h"
+#include <pugixml.hpp>
 
 #include "Cafe/IOSU/iosu_types_common.h"
 #include "Cafe/IOSU/nn/iosu_nn_service.h"
@@ -49,65 +49,65 @@ namespace iosu
 		bool isInitialized;
 	}iosuAcp = { 0 };
 
-	void _xml_parseU32(tinyxml2::XMLElement* xmlElement, const char* name, uint32be* v)
+	void _xml_parseU32(pugi::xml_node xmlElement, const char* name, uint32be* v)
 	{
-		tinyxml2::XMLElement* subElement = xmlElement->FirstChildElement(name);
+		pugi::xml_node subElement = xmlElement.child(name);
 		*v = 0;
 		if (subElement == nullptr)
 			return;
-		const char* text = subElement->GetText();
+		const char* text = subElement.text().get();
 		uint32 value;
 		if (sscanf(text, "%u", &value) == 0)
 			return;
 		*v = value;
 	}
 
-	void _xml_parseHex16(tinyxml2::XMLElement* xmlElement, const char* name, uint16be* v)
+	void _xml_parseHex16(pugi::xml_node xmlElement, const char* name, uint16be* v)
 	{
-		tinyxml2::XMLElement* subElement = xmlElement->FirstChildElement(name);
+		pugi::xml_node subElement = xmlElement.child(name);
 		*v = 0;
 		if (subElement == nullptr)
 			return;
-		const char* text = subElement->GetText();
+		const char* text = subElement.text().get();
 		uint32 value;
 		if (sscanf(text, "%x", &value) == 0)
 			return;
 		*v = value;
 	}
 
-	void _xml_parseHex32(tinyxml2::XMLElement* xmlElement, const char* name, uint32be* v)
+	void _xml_parseHex32(pugi::xml_node xmlElement, const char* name, uint32be* v)
 	{
-		tinyxml2::XMLElement* subElement = xmlElement->FirstChildElement(name);
+		pugi::xml_node subElement = xmlElement.child(name);
 		*v = 0;
 		if (subElement == nullptr)
 			return;
-		const char* text = subElement->GetText();
+		const char* text = subElement.text().get();
 		uint32 value;
 		if (sscanf(text, "%x", &value) == 0)
 			return;
 		*v = value;
 	}
 
-	void _xml_parseHex64(tinyxml2::XMLElement* xmlElement, const char* name, uint64* v)
+	void _xml_parseHex64(pugi::xml_node xmlElement, const char* name, uint64* v)
 	{
-		tinyxml2::XMLElement* subElement = xmlElement->FirstChildElement(name);
+		pugi::xml_node subElement = xmlElement.child(name);
 		*v = 0;
 		if (subElement == nullptr)
 			return;
-		const char* text = subElement->GetText();
+		const char* text = subElement.text().get();
 		uint64 value;
 		if (sscanf(text, "%" SCNx64, &value) == 0)
 			return;
 		*v = _swapEndianU64(value);
 	}
 
-	void _xml_parseString_(tinyxml2::XMLElement* xmlElement, const char* name, char* output, sint32 maxLength)
+	void _xml_parseString_(pugi::xml_node xmlElement, const char* name, char* output, sint32 maxLength)
 	{
-		tinyxml2::XMLElement* subElement = xmlElement->FirstChildElement(name);
+		pugi::xml_node subElement = xmlElement.child(name);
 		output[0] = '\0';
 		if (subElement == nullptr)
 			return;
-		const char* text = subElement->GetText();
+		const char* text = subElement.text().get();
 		if (text == nullptr)
 		{
 			output[0] = '\0';
@@ -122,10 +122,10 @@ namespace iosu
 	void parseSaveMetaXml(uint8* metaXmlData, sint32 metaXmlLength, acpMetaXml_t* metaXml)
 	{
 		memset(metaXml, 0, sizeof(acpMetaXml_t));
-		tinyxml2::XMLDocument appXml;
-		appXml.Parse((const char*)metaXmlData, metaXmlLength);
+		pugi::xml_document appXml;
+		appXml.load_buffer((const char*)metaXmlData, metaXmlLength);
 		uint32 titleVersion = 0xFFFFFFFF;
-		tinyxml2::XMLElement* menuElement = appXml.FirstChildElement("menu");
+		pugi::xml_node menuElement = appXml.child("menu");
 		if (menuElement)
 		{
 			_xml_parseHex64(menuElement, "title_id", &metaXml->title_id);
@@ -582,6 +582,24 @@ namespace iosu
 	namespace acp
 	{
 
+		class xml_writer_file_stream : public pugi::xml_writer {
+			FileStream* m_fs;
+
+		  public:
+			xml_writer_file_stream(FileStream* fs)
+				: m_fs(fs) {}
+
+			~xml_writer_file_stream()
+			{
+				delete m_fs;
+			}
+
+			void write(const void* data, size_t size) override
+			{
+				m_fs->writeData(data, size);
+			}
+		};
+
 		uint64 _ACPGetTimestamp()
 		{
 			return coreinit::coreinit_getOSTime() / ESPRESSO_TIMER_CLOCK;
@@ -599,43 +617,41 @@ namespace iosu
 			auto saveinfoData = FileStream::LoadIntoMemory(saveinfoPath);
 			if (saveinfoData && !saveinfoData->empty())
 			{
-				namespace xml = tinyxml2;
-				xml::XMLDocument doc;
-				tinyxml2::XMLError xmlError = doc.Parse((const char*)saveinfoData->data(), saveinfoData->size());
-				if (xmlError == xml::XML_SUCCESS || xmlError == xml::XML_ERROR_EMPTY_DOCUMENT)
+				pugi::xml_document doc;
+				pugi::xml_parse_result xmlError = doc.load_buffer(saveinfoData->data(), saveinfoData->size(), pugi::parse_declaration);
+				if (xmlError.status == pugi::status_ok || xmlError.status == pugi::status_no_document_element)
 				{
-					xml::XMLNode* child = doc.FirstChild();
+					pugi::xml_node child = doc.first_child();
 					// check for declaration -> <?xml version="1.0" encoding="utf-8"?>
-					if (!child || !child->ToDeclaration())
+					if (!child || child.type() != pugi::node_declaration)
 					{
-						xml::XMLDeclaration* decl = doc.NewDeclaration();
-						doc.InsertFirstChild(decl);
+						pugi::xml_node decl = doc.prepend_child(pugi::node_declaration);
+						decl.attribute("version").set_value("1.0");
+						decl.attribute("encoding").set_value("utf-8");
 					}
 
-					xml::XMLElement* info = doc.FirstChildElement("info");
+					pugi::xml_node info = doc.child("info");
 					if (!info)
 					{
-						info = doc.NewElement("info");
-						doc.InsertEndChild(info);
+						info = doc.append_child("info");
 					}
 
 					// find node with persistentId
 					char tmp[64];
 					sprintf(tmp, "%08x", persistentId);
 					bool foundNode = false;
-					for (xml::XMLElement* account = info->FirstChildElement("account"); account; account = account->NextSiblingElement("account"))
+					for (pugi::xml_node account = info.child("account"); account; account = account.next_sibling("account"))
 					{
-						if (account->Attribute("persistentId", tmp))
+						if (strcmp(account.attribute("persistentId").value(), tmp) == 0)
 						{
 							// found the entry! -> update timestamp
-							xml::XMLElement* timestamp = account->FirstChildElement("timestamp");
+							pugi::xml_node timestamp = account.child("timestamp");
 							sprintf(tmp, "%" PRIx64, _ACPGetTimestamp());
 							if (timestamp)
-								timestamp->SetText(tmp);
+								timestamp.set_value(tmp);
 							else
 							{
-								timestamp = doc.NewElement("timestamp");
-								account->InsertFirstChild(timestamp);
+								timestamp = account.prepend_child("timestamp");
 							}
 
 							foundNode = true;
@@ -645,31 +661,25 @@ namespace iosu
 
 					if (!foundNode)
 					{
-						tinyxml2::XMLElement* account = doc.NewElement("account");
+						pugi::xml_node account = info.prepend_child("account");
 						{
 							sprintf(tmp, "%08x", persistentId);
-							account->SetAttribute("persistentId", tmp);
+							account.append_attribute("persistentId").set_value(tmp);
 
-							tinyxml2::XMLElement* timestamp = doc.NewElement("timestamp");
+							pugi::xml_node timestamp = account.prepend_child("timestamp");
 							{
 								sprintf(tmp, "%" PRIx64, _ACPGetTimestamp());
-								timestamp->SetText(tmp);
+								timestamp.set_value(tmp);
 							}
-
-							account->InsertFirstChild(timestamp);
 						}
-
-						info->InsertFirstChild(account);
 					}
 
 					// update file
-					tinyxml2::XMLPrinter printer;
-					doc.Print(&printer);
 					FileStream* fs = FileStream::createFile2(saveinfoPath);
 					if (fs)
 					{
-						fs->writeString(printer.CStr());
-						delete fs;
+						xml_writer_file_stream writer(fs);
+						doc.save(writer);
 					}
 				}
 			}

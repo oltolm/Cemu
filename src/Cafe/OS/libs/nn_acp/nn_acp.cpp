@@ -6,8 +6,11 @@
 #include "Cafe/OS/libs/coreinit/coreinit_Time.h"
 
 #include <cinttypes>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <pugixml.hpp>
+#include <sstream>
 
 #include "config/ActiveSettings.h"
 #include "Cafe/IOSU/legacy/iosu_acp.h"
