@@ -53,8 +53,6 @@ add_library(CemuUtil
   SystemInfo/SystemInfo.cpp
   SystemInfo/SystemInfo.h
   ThreadPool/ThreadPool.h
-  tinyxml2/tinyxml2.cpp
-  tinyxml2/tinyxml2.h
   VirtualHeap/VirtualHeap.cpp
   VirtualHeap/VirtualHeap.h
   Zir/Core/IR.cpp
