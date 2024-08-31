@@ -8,6 +8,7 @@
 #include <queue>
 #include <filesystem>
 #include <fstream>
+#include <pugixml.hpp>
 
 #include "config/ActiveSettings.h"
 #include "config/NetworkSettings.h"
@@ -370,49 +371,48 @@ namespace iosu
 
 	bool parse_xml_content(Task& task)
 	{
-		tinyxml2::XMLDocument doc;
+		pugi::xml_document doc;
 		//cemuLog_log(LogType::Force, (char*)task.result_buffer.data());
-		if (doc.Parse((const char*)task.result_buffer.data(), task.processed_length) != tinyxml2::XML_SUCCESS)
+		if (doc.load_buffer((const char*)task.result_buffer.data(), task.processed_length) != pugi::status_ok)
 			return false;
 
-		for (tinyxml2::XMLElement* sheet = doc.FirstChildElement("TaskSheet"); sheet; sheet = sheet->
-		     NextSiblingElement("TaskSheet"))
+		for (pugi::xml_node sheet = doc.child("TaskSheet"); sheet; sheet = sheet.next_sibling("TaskSheet"))
 		{
-			const auto files = sheet->FirstChildElement("Files");
+			const auto files = sheet.child("Files");
 			if (!files)
 				continue;
 
-			for (tinyxml2::XMLElement* file = files->FirstChildElement("File"); file; file = file->NextSiblingElement("File"))
+			for (pugi::xml_node file = files.child("File"); file; file = file.next_sibling("File"))
 			{
-				auto file_name = file->FirstChildElement("Filename");
+				auto file_name = file.child("Filename");
 				if (!file_name)
 					continue;
 
-				auto data_id = file->FirstChildElement("DataId");
+				auto data_id = file.child("DataId");
 				if (!data_id)
 					continue;
 
-				auto type = file->FirstChildElement("Type");
+				auto type = file.child("Type");
 				if (!type)
 					continue;
 
-				auto url = file->FirstChildElement("Url");
+				auto url = file.child("Url");
 				if (!url)
 					continue;
 
-				auto size = file->FirstChildElement("Size");
+				auto size = file.child("Size");
 				if (!size)
 					continue;
 
 				FileType file_type;
-				if (0 == strcmp(type->GetText(), "AppData"))
+				if (0 == strcmp(type.text().get(), "AppData"))
 					file_type = FileType::kAppData;
 				else
 				{
 					file_type = FileType::kUnknownFile;
 				}
 
-				task.queued_files.emplace(file_name->GetText(), data_id->IntText(), file_type, url->GetText(), size->IntText());
+				task.queued_files.emplace(file_name.text().get(), data_id.text().as_uint(), file_type, url.text().get(), size.text().as_uint());
 			}
 		}
 
