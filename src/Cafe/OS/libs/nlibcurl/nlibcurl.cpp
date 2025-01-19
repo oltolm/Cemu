@@ -540,7 +540,7 @@ void export_curl_multi_init(PPCInterpreter_t* hCPU)
 	cemuLog_logDebug(LogType::Force, "curl_multi_init() -> 0x{:08x}", result.GetMPTR());
 	if (result)
 	{
-		memset(result.GetPtr(), 0, sizeof(CURLM_t));
+		memset((void*)result.GetPtr(), 0, sizeof(CURLM_t));
 		*result = {};
 		result->curlm = curl_multi_init();
 	}

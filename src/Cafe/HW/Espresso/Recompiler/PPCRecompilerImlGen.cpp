@@ -3565,7 +3565,7 @@ void PPCRecompilerIml_insertSegments(ppcImlGenContext_t* ppcImlGenContext, sint3
 	{
 		//memset(ppcImlGenContext->segmentList+index+i, 0x00, sizeof(PPCRecImlSegment_t*));
 		ppcImlGenContext->segmentList[index+i] = (PPCRecImlSegment_t*)malloc(sizeof(PPCRecImlSegment_t));
-		memset(ppcImlGenContext->segmentList[index+i], 0x00, sizeof(PPCRecImlSegment_t));
+		memset((void*)ppcImlGenContext->segmentList[index + i], 0x00, sizeof(PPCRecImlSegment_t));
 		ppcImlGenContext->segmentList[index + i]->list_prevSegments = std::vector<PPCRecImlSegment_t*>();
 	}
 }
