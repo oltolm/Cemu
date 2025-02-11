@@ -1,3 +1,4 @@
+#include "Cafe/HW/Latte/Core/LattePerformanceMonitor.h"
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h"
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h"
 
@@ -444,6 +445,7 @@ CopySurfacePipelineInfo* VulkanRenderer::copySurface_getOrCreateGraphicsPipeline
 	}
 	else
 		copyPipeline->vkObjPipeline->SetPipeline(pipeline);
+	performanceMonitor.vk.numGraphicPipelines.increment();
 	return copyPipeline;
 }
 
