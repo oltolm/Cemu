@@ -1,3 +1,4 @@
+#include "Cafe/HW/Latte/Core/LattePerformanceMonitor.h"
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanRenderer.h"
 #include "Cafe/HW/Latte/Renderer/Vulkan/VulkanAPI.h"
 
@@ -441,7 +442,7 @@ CopySurfacePipelineInfo* VulkanRenderer::copySurface_getOrCreateGraphicsPipeline
 		cemu_assert_debug(false);
 		copyPipeline->vkObjPipeline->pipeline = VK_NULL_HANDLE;
 	}
-	//performanceMonitor.vk.numGraphicPipelines.increment();
+	performanceMonitor.vk.numGraphicPipelines.increment();
 
 	//m_pipeline_cache_semaphore.notify();
 
