@@ -1,5 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
+#include "wx/msw/wx.rc"
+
 #include "resource/resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
