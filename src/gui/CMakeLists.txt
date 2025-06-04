@@ -153,6 +153,8 @@ target_link_libraries(CemuGui PRIVATE
 	ZArchive::zarchive
 )
 
+target_precompile_headers(CemuGui REUSE_FROM CemuCommon)
+
 if(ENABLE_WXWIDGETS AND UNIX AND NOT APPLE)
 	# PUBLIC because gdk/gdkkeysyms.h is included in guiWrapper.h
 	target_link_libraries(CemuGui PUBLIC GTK3::gtk)

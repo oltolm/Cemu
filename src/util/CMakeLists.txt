@@ -98,6 +98,8 @@ target_link_libraries(CemuUtil PRIVATE
 	OpenSSL::Crypto
 )
 
+target_precompile_headers(CemuUtil REUSE_FROM CemuCommon)
+
 if (ENABLE_WXWIDGETS)
 	target_link_libraries(CemuUtil PRIVATE wx::base wx::core)
 endif()
