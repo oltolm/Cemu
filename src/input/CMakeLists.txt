@@ -97,6 +97,9 @@ target_link_libraries(CemuInput PRIVATE
 	pugixml::pugixml
 	SDL2::SDL2
 )
+
+target_precompile_headers(CemuInput REUSE_FROM CemuCommon)
+
 if (ENABLE_HIDAPI)
 	target_link_libraries(CemuInput PRIVATE hidapi::hidapi)
 endif()
