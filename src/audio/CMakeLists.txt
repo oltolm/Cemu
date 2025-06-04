@@ -51,6 +51,8 @@ target_link_libraries(CemuAudio PRIVATE
 	CemuUtil
 )
 
+target_precompile_headers(CemuAudio REUSE_FROM CemuCommon)
+
 if(ENABLE_CUBEB)
 	# PUBLIC because cubeb.h/cubeb.h is included in CubebAPI.h
 	target_link_libraries(CemuAudio PUBLIC cubeb::cubeb)
