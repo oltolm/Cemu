@@ -580,6 +580,8 @@ target_link_libraries(CemuCafe PRIVATE
 	zstd::zstd
 )
 
+target_precompile_headers(CemuCafe PRIVATE "../Common/precompiled.h")
+
 if (ENABLE_WAYLAND)
 	# PUBLIC because wayland-client.h is included in VulkanAPI.h
   target_link_libraries(CemuCafe PUBLIC Wayland::Client)

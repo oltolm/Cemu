@@ -59,7 +59,8 @@ endif()
 
 # All the targets wanting to use the precompiled.h header
 # have to link to CemuCommon
-target_precompile_headers(CemuCommon PUBLIC precompiled.h)
+target_precompile_headers(CemuCommon PRIVATE precompiled.h)
+target_compile_options(CemuCommon PUBLIC -include "${CMAKE_CURRENT_SOURCE_DIR}/precompiled.h")
 target_include_directories(CemuCommon PUBLIC "../")
 
 target_link_libraries(CemuCommon PRIVATE

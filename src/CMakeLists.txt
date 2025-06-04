@@ -148,6 +148,8 @@ target_link_libraries(CemuBin PRIVATE
 	SDL2::SDL2
 )
 
+target_precompile_headers(CemuBin REUSE_FROM CemuCommon)
+
 if(UNIX AND NOT APPLE)
 	# due to nasm output some linkers will make stack executable
 	# cemu does not require this so we explicity disable it
