@@ -24,6 +24,8 @@ target_link_libraries(CemuConfig PRIVATE
 	pugixml::pugixml
 )
 
+target_precompile_headers(CemuConfig REUSE_FROM CemuCommon)
+
 if (ENABLE_WXWIDGETS)
 	# PUBLIC because wx/language.h is included in CemuConfig.h
 	# Could be made PRIVATE by using 0 instead of wxLANGUAGE_DEFAULT

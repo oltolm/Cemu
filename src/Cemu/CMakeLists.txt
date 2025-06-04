@@ -50,6 +50,8 @@ target_link_libraries(CemuComponents PRIVATE
 	ZLIB::ZLIB
 )
 
+target_precompile_headers(CemuComponents REUSE_FROM CemuCommon)
+
 # PUBLIC because fmt/format.h is included in ExpressionParser/ExpressionParser.h
 target_link_libraries(CemuComponents PUBLIC fmt::fmt)
 
