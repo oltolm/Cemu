@@ -40,12 +40,8 @@ DebugPPCThreadsWindow::DebugPPCThreadsWindow(wxFrame& parent)
 	: wxFrame(&parent, wxID_ANY, _("PPC threads"), wxDefaultPosition, wxSize(930, 280),
 			  wxCLOSE_BOX | wxCLIP_CHILDREN | wxCAPTION | wxRESIZE_BORDER)
 {
-	wxFrame::SetBackgroundColour(*wxWHITE);
-
 	auto* sizer = new wxBoxSizer(wxVERTICAL);
-	m_thread_list = new wxListView(this, GPLIST_ID, wxPoint(0, 0), wxSize(930, 240), wxLC_REPORT);
-
-	m_thread_list->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Courier New")); //wxSystemSettings::GetFont(wxSYS_OEM_FIXED_FONT));
+	m_thread_list = new wxListView(this, GPLIST_ID, wxDefaultPosition, wxSize(930, 240), wxLC_REPORT);
 
 	// add columns
 	wxListItem col0;
@@ -117,7 +113,7 @@ DebugPPCThreadsWindow::DebugPPCThreadsWindow(wxFrame& parent)
 	sizer->Add(m_thread_list, 1, wxEXPAND | wxALL, 5);
 
 	auto* row = new wxBoxSizer(wxHORIZONTAL);
-	wxButton* button = new wxButton(this, REFRESH_ID, _("Refresh"), wxPoint(0, 0), wxSize(80, 26));
+	wxButton* button = new wxButton(this, REFRESH_ID, _("Refresh"), wxDefaultPosition, wxSize(80, 26));
 	row->Add(button, 0, wxALL, 5);
 
 	m_auto_refresh = new wxCheckBox(this, AUTO_REFRESH_ID, _("Auto refresh"));
@@ -126,7 +122,7 @@ DebugPPCThreadsWindow::DebugPPCThreadsWindow(wxFrame& parent)
 
 	sizer->Add(row, 0, wxEXPAND | wxALL, 5);
 
-	m_thread_list->Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(DebugPPCThreadsWindow::OnThreadListRightClick), nullptr, this);
+	m_thread_list->Bind(wxEVT_RIGHT_DOWN, &DebugPPCThreadsWindow::OnThreadListRightClick, this);
 
 	SetSizer(sizer);
 

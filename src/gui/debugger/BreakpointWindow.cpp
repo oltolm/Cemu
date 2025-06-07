@@ -39,8 +39,6 @@ BreakpointWindow::BreakpointWindow(DebuggerWindow2& parent, const wxPoint& main_
 {
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
 
-	this->wxWindowBase::SetBackgroundColour(*wxWHITE);
-
 	wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
 
 	m_breakpoints = new wxDataViewListCtrl(this, wxID_ANY);

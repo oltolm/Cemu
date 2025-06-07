@@ -6,6 +6,7 @@
 
 #include <numeric>
 
+#include <wx/gdicmn.h>
 #include <wx/listctrl.h>
 #include <wx/wupdlock.h>
 #include <wx/menu.h>
@@ -465,7 +466,7 @@ void wxGameList::UpdateItemColors(sint32 startIndex)
 		if (GetConfig().IsGameListFavorite(titleId))
 		{
 			SetItemBackgroundColour(i, kFavoriteColor);
-			SetItemTextColour(i, 0x000000UL);
+			SetItemTextColour(i, *wxBLACK);
 		}
 		else if ((i&1) != 0)
 		{

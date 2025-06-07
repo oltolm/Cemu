@@ -5,13 +5,6 @@
 #include <unordered_map>
 #include <sstream>
 
-#define COLOR_BLACK				0xFF000000
-#define COLOR_GREY				0xFFA0A0A0
-#define COLOR_LIGHT_GREY		0xFFE0E0E0
-#define COLOR_WHITE				0xFFFFFFFF
-#define COLOR_RED				0xFF0000FF
-
-
 class TextList : public wxControl, public wxScrollHelper
 {
 public:
@@ -72,8 +65,6 @@ private:
 
 	std::unordered_map<sint32, bool> m_key_states;
 
-	wxFont m_font;
-	
 	wxTimer* m_tooltip_timer;
 	wxPoint m_mouse_position;
 };

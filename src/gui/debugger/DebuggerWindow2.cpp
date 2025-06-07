@@ -270,8 +270,6 @@ DebuggerWindow2::DebuggerWindow2(wxFrame& parent, const wxRect& display_size)
 	: wxFrame(&parent, wxID_ANY, _("PPC Debugger"), wxDefaultPosition, wxSize(1280, 300), wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxSYSTEM_MENU | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT),
 		m_module_address(0)
 {
-	this->wxWindowBase::SetBackgroundColour(*wxWHITE);
-
 	const auto file = ActiveSettings::GetConfigPath("debugger/config.xml");
 	m_config.SetFilename(file.generic_wstring());
 	m_config.Load();
@@ -309,7 +307,6 @@ DebuggerWindow2::DebuggerWindow2(wxFrame& parent, const wxRect& display_size)
 	}
 
 	m_module_label = new wxStaticText(this, wxID_ANY, label_text);
-	m_module_label->SetBackgroundColour(*wxWHITE);
 	m_module_label->SetForegroundColour(wxColour(0xFFbf52fe));
 	main_sizer->Add(m_module_label, 0, wxEXPAND | wxALL, 5);
 

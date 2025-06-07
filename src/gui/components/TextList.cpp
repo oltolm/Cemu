@@ -1,5 +1,8 @@
 #include "gui/wxgui.h"
 #include "TextList.h"
+#include <wx/dcbuffer.h>
+#include <wx/gdicmn.h>
+#include <wx/settings.h>
 #include <wx/setup.h>
 #include <wx/tooltip.h>
 
@@ -21,7 +24,6 @@ TextList::~TextList()
 TextList::TextList(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
 	: wxControl(parent, id, pos, size, style), wxScrollHelper(this)
 {
-	m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 	wxWindowBase::SetBackgroundStyle(wxBG_STYLE_PAINT);
 
 	wxClientDC dc(this);
@@ -278,8 +280,7 @@ void TextList::OnTooltipTimer(wxTimerEvent& event)
 
 void TextList::OnPaintEvent(wxPaintEvent& event)
 {
-	wxBufferedPaintDC dc(m_targetWindow, wxBUFFER_VIRTUAL_AREA);
-	dc.SetFont(m_font);
+	wxAutoBufferedPaintDC dc(m_targetWindow);
 
 	// get window position
 	auto position = GetPosition();
@@ -291,7 +292,7 @@ void TextList::OnPaintEvent(wxPaintEvent& event)
 	position.y = (rect_update.y / m_line_height) * m_line_height;
 
 	// paint background
-	const wxColour window_colour = COLOR_WHITE;
+	const wxColour window_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
 	dc.SetBrush(window_colour);
 	dc.SetPen(window_colour);
 	dc.DrawRectangle(rect_update);
@@ -311,7 +312,4 @@ void TextList::OnPaintEvent(wxPaintEvent& event)
 	m_scrolled_to_end = (start + count) >= m_element_count;
 
 	OnDraw(dc, start, count, position);
-
-
-	this->Update();
 }
