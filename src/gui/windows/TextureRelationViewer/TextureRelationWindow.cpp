@@ -1,6 +1,7 @@
 #include "gui/wxgui.h"
 #include "TextureRelationWindow.h"
 #include "Cafe/HW/Latte/Core/LatteTexture.h"
+#include <wx/gdicmn.h>
 
 enum
 {
@@ -43,9 +44,7 @@ TextureRelationViewerWindow::TextureRelationViewerWindow(wxFrame& parent)
 
 	wxPanel* mainPane = new wxPanel(this);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	textureRelationListA = new wxListCtrl(mainPane, TEX_LIST_A_ID, wxPoint(0, 0), wxSize(1008, 440), wxLC_REPORT);
-
-	textureRelationListA->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Courier New"));//wxSystemSettings::GetFont(wxSYS_OEM_FIXED_FONT));
+	textureRelationListA = new wxListCtrl(mainPane, TEX_LIST_A_ID, wxDefaultPosition, wxSize(1008, 440), wxLC_REPORT);
 
 	// add columns
 	wxListItem colType;
@@ -113,17 +112,17 @@ TextureRelationViewerWindow::TextureRelationViewerWindow(wxFrame& parent)
 	wxBoxSizer* sizerBottom = new wxBoxSizer(wxHORIZONTAL);
 
 	sizer->Add(textureRelationListA, 1, wxEXPAND | wxBOTTOM, 0);
-	wxButton* button = new wxButton(mainPane, REFRESH_ID, _("Refresh"), wxPoint(0, 0), wxSize(80, 26));
-	sizerBottom->Add(button, 0, wxBOTTOM | wxTOP | wxLEFT, 10);
+	wxButton* button = new wxButton(mainPane, REFRESH_ID, _("Refresh"), wxDefaultPosition, wxSize(80, 26));
+	sizerBottom->Add(button, 0, wxBOTTOM | wxTOP | wxLEFT | wxALIGN_CENTER_VERTICAL, 10);
 
-	wxCheckBox* checkboxShowOnlyActive = new wxCheckBox(mainPane, CHECKBOX_SHOW_ONLY_ACTIVE, _("Show only active"), wxPoint(0, 0), wxSize(110, 26));
-	sizerBottom->Add(checkboxShowOnlyActive, 0, wxBOTTOM | wxTOP | wxLEFT, 10);
+	wxCheckBox* checkboxShowOnlyActive = new wxCheckBox(mainPane, CHECKBOX_SHOW_ONLY_ACTIVE, _("Show only active"));
+	sizerBottom->Add(checkboxShowOnlyActive, 0, wxBOTTOM | wxTOP | wxLEFT | wxALIGN_CENTER_VERTICAL, 10);
 
-	wxCheckBox* checkboxShowViews = new wxCheckBox(mainPane, CHECKBOX_SHOW_VIEWS, _("Show views"), wxPoint(0, 0), wxSize(90, 26));
-	sizerBottom->Add(checkboxShowViews, 0, wxBOTTOM | wxTOP | wxLEFT, 10);
+	wxCheckBox* checkboxShowViews = new wxCheckBox(mainPane, CHECKBOX_SHOW_VIEWS, _("Show views"));
+	sizerBottom->Add(checkboxShowViews, 0, wxBOTTOM | wxTOP | wxLEFT | wxALIGN_CENTER_VERTICAL, 10);
 	checkboxShowViews->SetValue(true);
 
-	textureRelationListA->Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(TextureRelationViewerWindow::OnTextureListRightClick), NULL, this);
+	textureRelationListA->Bind(wxEVT_RIGHT_DOWN, &TextureRelationViewerWindow::OnTextureListRightClick, this);
 
 	sizer->Add(
 		sizerBottom,
@@ -132,8 +131,6 @@ TextureRelationViewerWindow::TextureRelationViewerWindow(wxFrame& parent)
 	mainPane->SetSizer(sizer);
 
 	RefreshTextureList();
-
-	wxFrame::SetBackgroundColour(*wxWHITE);
 }
 
 TextureRelationViewerWindow::~TextureRelationViewerWindow()

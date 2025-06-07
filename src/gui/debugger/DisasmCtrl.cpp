@@ -14,6 +14,7 @@
 #include "Cemu/ExpressionParser/ExpressionParser.h"
 #include "Cafe/HW/Espresso/Debugger/DebugSymbolStorage.h"
 #include <wx/mstream.h> // for wxMemoryInputStream
+#include <wx/settings.h>
 
 wxDEFINE_EVENT(wxEVT_DISASMCTRL_NOTIFY_GOTO_ADDRESS, wxCommandEvent);
 
@@ -155,15 +156,15 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 	else if(virtualAddress == m_lastGotoTarget)
 		background_colour = wxColour(0xFFE0E0E0);
 	else
-		background_colour = wxColour(COLOR_WHITE);
+		background_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
 
 	DrawLineBackground(dc, position, background_colour);
 
-	dc.SetTextForeground(COLOR_BLACK);
+	dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 	dc.DrawText(wxString::Format("%08x", virtualAddress), position);
 	position.x += OFFSET_ADDRESS;
 
-	dc.SetTextForeground(COLOR_GREY);
+	dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 	if (rplModule)
 		dc.DrawText(wxString::Format("+0x%-8x", virtualAddress - rplModule->regionMappingBase_text.GetMPTR()), position);
 	else
@@ -232,7 +233,7 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 			continue;
 
 		if (!is_first_operand)
-			WriteText(dc, ", ", position, COLOR_BLACK);
+			WriteText(dc, ", ", position, wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 
 		is_first_operand = false;
 		switch (disasmInstr.operand[o].type)
@@ -333,7 +334,7 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 				else
 					x.Append(wxUniChar(0x2193)); // arrow down
 
-				WriteText(dc, x, position, COLOR_BLACK);
+				WriteText(dc, x, position, wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			}
 
 			break;
@@ -348,11 +349,11 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 				string = wxString::Format("-0x%x", -disasmInstr.operand[o].immS32);
 
 			WriteText(dc, string, position, SYNTAX_COLOR_IMM_OFFSET);
-			WriteText(dc, "(", position, COLOR_BLACK);
+			WriteText(dc, "(", position, wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 
 			// register
 			WriteText(dc, wxString::Format("r%d", disasmInstr.operand[o].registerIndex), position, SYNTAX_COLOR_GPR);
-			WriteText(dc, ")", position, COLOR_BLACK);
+			WriteText(dc, ")", position, wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			break;
 		}
 		default:
@@ -364,7 +365,7 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 	position.x = start_width + OFFSET_DISASSEMBLY;
 	const auto comment = static_cast<rplDebugSymbolComment*>(rplDebugSymbol_getForAddress(virtualAddress));
 	if (comment && comment->type == RplDebugSymbolComment)
-		WriteText(dc, comment->comment, position, COLOR_BLACK);
+		WriteText(dc, comment->comment, position, wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 	else if (isRLWINM)
 	{
 		sint32 rS, rA, SH, MB, ME;
@@ -385,7 +386,7 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 			string = wxString::Format("r%d=r%d>>%d", rA, rS, 32 - SH);
 		else
 			string = wxString::Format("r%d=(r%d<<<%d)&0x%x", rA, rS, SH, mask);
-		WriteText(dc, string, position, COLOR_GREY);
+		WriteText(dc, string, position, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 	}
 	else if (disasmInstr.ppcAsmCode == PPCASM_OP_SUBF || disasmInstr.ppcAsmCode == PPCASM_OP_SUBF_)
 	{
@@ -396,7 +397,7 @@ void DisasmCtrl::DrawDisassemblyLine(wxDC& dc, const wxPoint& linePosition, MPTR
 
 		wxString string;
 		string = wxString::Format("r%d=r%d-r%d", rD, rB, rA);
-		WriteText(dc, string, position, COLOR_GREY);
+		WriteText(dc, string, position, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 	}
 }
 

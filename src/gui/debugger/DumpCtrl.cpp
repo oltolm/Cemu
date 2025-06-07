@@ -6,10 +6,7 @@
 #include "util/helpers/helpers.h"
 
 #include "Cemu/ExpressionParser/ExpressionParser.h"
-
-#define COLOR_BLACK				0xFF000000
-#define COLOR_GREY				0xFFA0A0A0
-#define COLOR_WHITE				0xFFFFFFFF
+#include <wx/settings.h>
 
 #define COLOR_DEBUG_ACTIVE_BP	0xFFFFA0FF
 #define COLOR_DEBUG_ACTIVE		0xFFFFA080
@@ -68,11 +65,11 @@ void DumpCtrl::OnDraw(wxDC& dc, sint32 start, sint32 count, const wxPoint& start
 	{
 		const uint32 virtual_address = m_memoryRegion.baseAddress + (start + i) * 0x10;
 
-		dc.SetTextForeground(wxColour(COLOR_BLACK));
+		dc.SetTextForeground(wxColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT)));
 		dc.DrawText(wxString::Format("%08x", virtual_address), position);
 		position.x += OFFSET_ADDRESS;
 
-		dc.SetTextForeground(wxColour(COLOR_GREY));
+		dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 		if (currentCodeRPL)
 		{
 			dc.DrawText(wxString::Format("+0x%-8x", virtual_address - currentCodeRPL->regionMappingBase_text.GetMPTR()), position);
@@ -110,7 +107,7 @@ void DumpCtrl::OnDraw(wxDC& dc, sint32 start, sint32 count, const wxPoint& start
 				position.x += (m_char_width * 3);
 			}
 			position.x = start_width = OFFSET_MEMORY;
-			dc.SetTextForeground(wxColour(COLOR_BLACK));
+			dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			for (auto b : data)
 			{
 				if (isprint(b))

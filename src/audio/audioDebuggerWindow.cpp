@@ -27,9 +27,8 @@ AudioDebuggerWindow::AudioDebuggerWindow(wxFrame& parent)
 	
 	wxPanel* mainPane = new wxPanel(this);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	
-	voiceListbox = new wxListCtrl(mainPane, VOICELIST_ID, wxPoint(0, 0), wxSize(1126, 570), wxLC_REPORT);
-	voiceListbox->SetFont(wxFont(8, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Courier New"));
+
+	voiceListbox = new wxListCtrl(mainPane, VOICELIST_ID, wxDefaultPosition, wxSize(1126, 570), wxLC_REPORT);
 	// add columns
 	wxListItem col0;
 	col0.SetId(0);
@@ -125,7 +124,7 @@ AudioDebuggerWindow::AudioDebuggerWindow(wxFrame& parent)
 
 	sizer->Add(voiceListbox, 1, wxEXPAND | wxBOTTOM, 0);
 
-	voiceListbox->Connect(wxEVT_RIGHT_DOWN, wxMouseEventHandler(AudioDebuggerWindow::OnVoiceListRightClick), NULL, this);
+	voiceListbox->Bind(wxEVT_RIGHT_DOWN, &AudioDebuggerWindow::OnVoiceListRightClick, this);
 
 	mainPane->SetSizer(sizer);
 
@@ -140,8 +139,6 @@ AudioDebuggerWindow::AudioDebuggerWindow(wxFrame& parent)
 		voiceListbox->InsertItem(item);
 	}
 	RefreshVoiceList();
-
-	wxFrame::SetBackgroundColour(*wxWHITE);
 
 	// start refresh timer
 	static const int INTERVAL = 100; // milliseconds

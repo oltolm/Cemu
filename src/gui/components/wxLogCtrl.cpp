@@ -1,6 +1,8 @@
 #include "gui/components/wxLogCtrl.h"
+#include "wxHelper.h"
 
 #include <boost/algorithm/string.hpp>
+#include <wx/settings.h>
 
 wxDEFINE_EVENT(EVT_ON_LIST_UPDATED, wxEvent);
 
@@ -95,13 +97,13 @@ void wxLogCtrl::OnDraw(wxDC& dc, sint32 start, sint32 count, const wxPoint& star
 	{
 		wxColour background_colour;
 		if((start + i) % 2 == 0)
-			background_colour = COLOR_WHITE;
+			background_colour = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
 		else
-			background_colour = 0xFFFDF9F2;
+			background_colour = wxHelper::CalculateAccentColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
 		DrawLineBackground(dc, position, background_colour);
 
-		dc.SetTextForeground(COLOR_BLACK);
+		dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 		dc.DrawText(it->get().second, position);
 
 		NextLine(position, &start_position);
