@@ -2,6 +2,7 @@
 #include "gui/debugger/RegisterCtrl.h"
 
 #include <sstream>
+#include <wx/settings.h>
 
 #include "Cafe/OS/RPL/rpl_structs.h"
 #include "Cafe/OS/RPL/rpl.h"
@@ -44,15 +45,15 @@ void RegisterCtrl::OnDraw(wxDC& dc, sint32 start, sint32 count, const wxPoint& s
 
 		if (line < 32)
 		{
-			dc.SetTextForeground(COLOR_BLACK);
+			dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			dc.DrawText(wxString::Format("R%d", line), position);
 			position.x += OFFSET_REGISTER;
 
 			const uint32 register_value = debuggerState.debugSession.ppcSnapshot.gpr[line];
 			if(register_value != m_prev_snapshot.gpr[line])
-				dc.SetTextForeground(COLOR_RED);
+				dc.SetTextForeground(*wxRED);
 			else
-				dc.SetTextForeground(COLOR_BLACK);
+				dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 
 			dc.DrawText(wxString::Format("%08x", register_value), position);
 			position.x += OFFSET_REGISTER_LABEL;
@@ -130,30 +131,30 @@ void RegisterCtrl::OnDraw(wxDC& dc, sint32 start, sint32 count, const wxPoint& s
 		else if( 32 + 1 <= line && line <= 32 + 1 + 32)
 		{
 			const uint32 register_index = line - 32 - 1;
-			dc.SetTextForeground(COLOR_BLACK);
+			dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			dc.DrawText(wxString::Format("F0_%d", register_index), position);
 			position.x += OFFSET_REGISTER;
 
 			const uint64 fpr0_value = debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp0int;
 			if (fpr0_value != m_prev_snapshot.fpr[register_index].fp0int)
-				dc.SetTextForeground(COLOR_RED);
+				dc.SetTextForeground(*wxRED);
 			else
-				dc.SetTextForeground(COLOR_BLACK);
+				dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 
 			//dc.DrawText(wxString::Format("%016llx", fpr0_value), position);
 			dc.DrawText(wxString::Format("%lf", debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp0), position);
 
 			position.x += OFFSET_FPR;
 
-			dc.SetTextForeground(COLOR_BLACK);
+			dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 			dc.DrawText(wxString::Format("F1_%d", register_index), position);
 			position.x += OFFSET_REGISTER;
 
 			const uint64 fpr1_value = debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp1int;
 			if (fpr1_value != m_prev_snapshot.fpr[register_index].fp1int)
-				dc.SetTextForeground(COLOR_RED);
+				dc.SetTextForeground(*wxRED);
 			else
-				dc.SetTextForeground(COLOR_BLACK);
+				dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
 
 			//dc.DrawText(wxString::Format("%016llx", fpr1_value), position);
 			dc.DrawText(wxString::Format("%lf", debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp1), position);

@@ -40,6 +40,7 @@ wxDEFINE_EVENT(wxEVT_REMOVE_ENTRY, wxCommandEvent);
 wxTitleManagerList::wxTitleManagerList(wxWindow* parent, wxWindowID id)
 	: wxListView(parent, id, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_VIRTUAL)
 {
+	EnableAlternateRowColours(true);
 	AddColumns();
 
 	// tooltip TODO: extract class mb wxPanelTooltip

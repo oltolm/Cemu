@@ -1,4 +1,5 @@
 #pragma once
+#include <wx/colour.h>
 #include <wx/string.h>
 
 namespace wxHelper
