@@ -967,5 +967,8 @@ void InputSettings2::on_controller_settings(wxCommandEvent& event)
 		break;
 	}
 	#endif
+
+	case InputAPI::MAX:
+		break;
 	}
 }

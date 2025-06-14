@@ -64,7 +64,7 @@ CubebInputAPI::CubebInputAPI(cubeb_devid devid, uint32 samplerate, uint32 channe
 		input_params.layout = CUBEB_LAYOUT_3F4_LFE;
 		break;
 	case 6:
-		input_params.layout = CUBEB_LAYOUT_QUAD_LFE | CHANNEL_FRONT_CENTER;
+		input_params.layout = static_cast<int>(CUBEB_LAYOUT_QUAD_LFE) | static_cast<int>(CHANNEL_FRONT_CENTER);
 		break;
 	case 4:
 		input_params.layout = CUBEB_LAYOUT_QUAD;
