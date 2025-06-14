@@ -7,6 +7,7 @@
 
 #include <wx/translation.h>
 
+#include "Common/precompiled.h"
 #include "config/ActiveSettings.h"
 
 #include <boost/random/uniform_int.hpp>
@@ -141,6 +142,19 @@ typedef struct tagTHREADNAME_INFO
 void SetThreadName(const char* name)
 {
 #if BOOST_OS_WINDOWS
+	using SetThreadDescription_t = HRESULT (*)(HANDLE hThread, PCWSTR lpThreadDescription);
+	HMODULE hModule = LoadLibraryW(L"Kernel32.dll");
+	if (hModule)
+	{
+		static SetThreadDescription_t pSetThreadDescription = nullptr;
+		if (!pSetThreadDescription)
+			pSetThreadDescription = (SetThreadDescription_t)GetProcAddress(hModule, "SetThreadDescription");
+		if (pSetThreadDescription)
+		{
+			std::wstring threadDescription = boost::nowide::widen(name);
+			pSetThreadDescription(GetCurrentThread(), threadDescription.c_str());
+		}
+	}
 #ifdef _MSC_VER
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -156,7 +170,6 @@ void SetThreadName(const char* name)
 	}
 #pragma warning(pop)
 #endif
-// TODO: call Windows 10 function SetThreadName
 #elif BOOST_OS_MACOS
 	pthread_setname_np(name);
 #else
