@@ -641,6 +641,8 @@ namespace iosu
 		case ContentType::kText:
 			cemuLog_logDebug(LogType::Force, "task_run returns text: {}", fmt::ptr(it->result_buffer.data()));
 			break;
+		case ContentType::kUnknownContent:
+			break;
 		}
 
 
