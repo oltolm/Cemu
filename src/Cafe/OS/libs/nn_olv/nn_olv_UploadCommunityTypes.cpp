@@ -1,5 +1,6 @@
 #include "nn_olv_UploadCommunityTypes.h"
 #include <algorithm>
+#include <memory>
 
 namespace nn
 {
@@ -76,7 +77,7 @@ namespace nn
 			std::string form_desc;
 			std::string form_searchKey[5];
 			std::string encodedAppData;
-			uint8* encodedIcon = nullptr;
+			std::unique_ptr<uint8[]> encodedIcon;
 
 			curl_mime *mime = curl_mime_init(req.getCURL());
 			curl_mimepart *part;
@@ -85,17 +86,16 @@ namespace nn
 			{
 				if (!pParam->iconData.IsNull())
 				{
-					encodedIcon = new uint8[pParam->iconDataLen];
+					encodedIcon = std::make_unique<uint8[]>(pParam->iconDataLen);
 					if (encodedIcon)
 					{
-						sint32 iconEncodeRes = EncodeTGA(pParam->iconData.GetPtr(), pParam->iconDataLen, encodedIcon, pParam->iconDataLen, TGACheckType::CHECK_COMMUNITY_ICON);
+						sint32 iconEncodeRes = EncodeTGA(pParam->iconData.GetPtr(), pParam->iconDataLen, encodedIcon.get(), pParam->iconDataLen, TGACheckType::CHECK_COMMUNITY_ICON);
 						if (iconEncodeRes <= 0)
 						{
-							delete[] encodedIcon;
 							return OLV_RESULT_NOT_ENOUGH_SIZE; // ?
 						}
 
-						base64icon = NCrypto::base64Encode(encodedIcon, iconEncodeRes);
+						base64icon = NCrypto::base64Encode(encodedIcon.get(), iconEncodeRes);
 						part = curl_mime_addpart(mime);
 						curl_mime_name(part, "icon");
 						res = olv_curlformcode_to_error(curl_mime_data(part, base64icon.data(), base64icon.size()));
@@ -163,9 +163,6 @@ namespace nn
 				cemuLog_log(LogType::Force, "Error in multipart curl -> {}", error.what());
 				curl_mime_free(mime);
 
-				if (encodedIcon)
-					delete[] encodedIcon;
-
 				return res;
 			}
 
@@ -175,9 +172,6 @@ namespace nn
 			bool reqResult = req.submitRequest(true);
 			long httpCode = 0;
 			curl_easy_getinfo(req.getCURL(), CURLINFO_RESPONSE_CODE, &httpCode);
-
-			if (encodedIcon)
-				delete[] encodedIcon;
 
 			if (!reqResult)
 			{
