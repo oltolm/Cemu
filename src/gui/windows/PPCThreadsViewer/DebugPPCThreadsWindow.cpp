@@ -468,7 +468,7 @@ void DebugPPCThreadsWindow::OnThreadListRightClick(wxMouseEvent& event)
 	menu.AppendSeparator();
 	menu.Append(THREADLIST_MENU_DUMP_STACK_TRACE, _("Write stack trace to log"));
 	menu.Append(THREADLIST_MENU_PROFILE_THREAD, _("Profile thread"));
-	menu.Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(DebugPPCThreadsWindow::OnThreadListPopupClick), nullptr, this);
+	menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &DebugPPCThreadsWindow::OnThreadListPopupClick, this);
 	PopupMenu(&menu);
 }
 
