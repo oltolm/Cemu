@@ -1,11 +1,12 @@
 #pragma once
-#include "gui/wxcomponents/checkedlistctrl.h"
+#include <wx/dataview.h>
+#include <wx/frame.h>
 
 class DebuggerWindow2;
 
 class BreakpointWindow : public wxFrame
 {
-public:
+  public:
 	BreakpointWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size);
 	virtual ~BreakpointWindow();
 
@@ -13,13 +14,14 @@ public:
 	void OnUpdateView();
 	void OnGameLoaded();
 
-private:
-	void OnBreakpointToggled(wxListEvent& event);
-	void OnLeftDClick(wxMouseEvent& event);
-	void OnRightDown(wxMouseEvent& event);
+  private:
+	void OnBreakpointToggled(wxDataViewEvent& event);
+	void OnEditingDone(wxDataViewEvent& event);
+	void OnContextMenu(wxDataViewEvent& event);
+	void OnItemActivated(wxDataViewEvent& event);
 
 	void OnContextMenuClick(wxCommandEvent& evt);
 	void OnContextMenuClickSelected(wxCommandEvent& evt);
 
-	wxCheckedListCtrl* m_breakpoints;
+	wxDataViewListCtrl* m_breakpoints;
 };
