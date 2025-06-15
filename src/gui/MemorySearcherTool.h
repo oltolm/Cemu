@@ -3,10 +3,20 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
+#include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/textctrl.h>
+#include <wx/timer.h>
 
 #include "Cafe/HW/MMU/MMU.h"
 #include "util/helpers/helpers.h"
 #include "gui/helpers/wxCustomEvents.h"
+
+class wxComboBox;
+class wxDataViewEvent;
+class wxDataViewListCtrl;
+class wxListView;
+class wxStaticText;
 
 enum SearchDataType
 {
