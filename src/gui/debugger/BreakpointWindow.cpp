@@ -204,7 +204,7 @@ void BreakpointWindow::OnContextMenu(wxDataViewEvent& event)
 		menu.Append(MENU_ID_CREATE_MEM_BP_READ, _("Create memory breakpoint (read)"));
 		menu.Append(MENU_ID_CREATE_MEM_BP_WRITE, _("Create memory breakpoint (write)"));
 
-		menu.Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(BreakpointWindow::OnContextMenuClick), nullptr, this);
+		menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &BreakpointWindow::OnContextMenuClick, this);
 		PopupMenu(&menu);
 	}
 	else
@@ -214,7 +214,7 @@ void BreakpointWindow::OnContextMenu(wxDataViewEvent& event)
 		wxMenu menu;
 		menu.Append(MENU_ID_DELETE_BP, _("Delete breakpoint"));
 
-		menu.Connect(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(BreakpointWindow::OnContextMenuClickSelected), nullptr, this);
+		menu.Bind(wxEVT_COMMAND_MENU_SELECTED, &BreakpointWindow::OnContextMenuClickSelected, this);
 		PopupMenu(&menu);
 	}
 }
