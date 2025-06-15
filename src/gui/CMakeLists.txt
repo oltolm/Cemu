@@ -117,8 +117,6 @@ add_library(CemuGui
   wxcomponents/checkedlistctrl.h
   wxcomponents/checked_mo.xpm
   wxcomponents/checked.xpm
-  wxcomponents/checktree.cpp
-  wxcomponents/checktree.h
   wxcomponents/unchecked2.xpm
   wxcomponents/unchecked_dis.xpm
   wxcomponents/unchecked_d.xpm
