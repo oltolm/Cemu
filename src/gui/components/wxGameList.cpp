@@ -1,13 +1,17 @@
 #include "gui/components/wxGameList.h"
 
+#include "Cafe/TitleList/TitleId.h"
 #include "gui/helpers/wxCustomData.h"
 #include "util/helpers/helpers.h"
 #include "gui/GameProfileWindow.h"
 
 #include <numeric>
 
+#include <utility>
 #include <wx/gdicmn.h>
+#include <wx/listbase.h>
 #include <wx/listctrl.h>
+#include <wx/types.h>
 #include <wx/wupdlock.h>
 #include <wx/menu.h>
 #include <wx/mstream.h>
@@ -359,11 +363,11 @@ void wxGameList::ReloadGameEntries(bool cached)
 	m_callbackIdTitleList = CafeTitleList::RegisterCallback([](CafeTitleListCallbackEvent* evt, void* ctx) { ((wxGameList*)ctx)->HandleTitleListCallback(evt); }, this);
 }
 
-long wxGameList::FindListItemByTitleId(uint64 title_id) const
+long wxGameList::FindListItemByTitleId(TitleId title_id) const
 {
 	for (int i = 0; i < GetItemCount(); ++i)
 	{
-		const auto id = (uint64)GetItemData(i);
+		const auto id = (TitleId)GetItemData(i);
 		if (id == title_id)
 			return i;
 	}
@@ -372,7 +376,7 @@ long wxGameList::FindListItemByTitleId(uint64 title_id) const
 }
 
 // get title name with cache
-std::string wxGameList::GetNameByTitleId(uint64 titleId)
+std::string wxGameList::GetNameByTitleId(TitleId titleId)
 {
 	auto it = m_name_cache.find(titleId);
 	if (it != m_name_cache.end())
@@ -397,11 +401,11 @@ void wxGameList::SetStyle(Style style, bool save)
 	m_style = style;
 	SetWindowStyleFlag(GetStyleFlags(m_style));
 
-	uint64 selected_title_id = 0;
+	TitleId selected_title_id = 0;
 	auto selection = GetFirstSelected();
 	if (selection != wxNOT_FOUND)
 	{
-		selected_title_id = (uint64)GetItemData(selection);
+		selected_title_id = (TitleId)GetItemData(selection);
 		selection = wxNOT_FOUND;
 	}
 
@@ -462,7 +466,7 @@ void wxGameList::UpdateItemColors(sint32 startIndex)
 
     for (int i = startIndex; i < GetItemCount(); ++i)
     {
-        const auto titleId = (uint64)GetItemData(i);
+		const auto titleId = (TitleId)GetItemData(i);
 		if (GetConfig().IsGameListFavorite(titleId))
 		{
 			SetItemBackgroundColour(i, kFavoriteColor);
@@ -491,26 +495,23 @@ static inline int order_to_int(const std::weak_ordering &wo)
 	return 0;
 }
 
-std::weak_ordering wxGameList::SortComparator(uint64 titleId1, uint64 titleId2, SortData* sortData)
+std::weak_ordering wxGameList::SortComparator(TitleId titleId1, TitleId titleId2, SortData* sortData)
 {
-	auto titleLastPlayed = [](uint64_t id)
-	{
-	  iosu::pdm::GameListStat playTimeStat{};
-	  iosu::pdm::GetStatForGamelist(id, playTimeStat);
-	  return playTimeStat;
+	auto titleLastPlayed = [](TitleId id) {
+		iosu::pdm::GameListStat playTimeStat{};
+		iosu::pdm::GetStatForGamelist(id, playTimeStat);
+		return playTimeStat;
 	};
 
-	auto titlePlayMinutes = [](uint64_t id)
-	{
-	  iosu::pdm::GameListStat playTimeStat;
-	  if (!iosu::pdm::GetStatForGamelist(id, playTimeStat))
-		  return 0u;
-	  return playTimeStat.numMinutesPlayed;
+	auto titlePlayMinutes = [](TitleId id) {
+		iosu::pdm::GameListStat playTimeStat;
+		if (!iosu::pdm::GetStatForGamelist(id, playTimeStat))
+			return 0u;
+		return playTimeStat.numMinutesPlayed;
 	};
 
-	auto titleRegion = [](uint64_t id)
-	{
-	  return CafeTitleList::GetGameInfo(id).GetRegion();
+	auto titleRegion = [](TitleId id) {
+		return CafeTitleList::GetGameInfo(id).GetRegion();
 	};
 
 	switch(sortData->column)
@@ -541,7 +542,10 @@ std::weak_ordering wxGameList::SortComparator(uint64 titleId1, uint64 titleId2, 
 int wxGameList::SortFunction(wxIntPtr item1, wxIntPtr item2, wxIntPtr sortData)
 {
 	const auto sort_data = (SortData*)sortData;
-	return sort_data->dir * order_to_int(sort_data->thisptr->SortComparator((uint64)item1, (uint64)item2, sort_data));
+	if (!sort_data->asc)
+		std::swap(item1, item2);
+	auto cmp = sort_data->thisptr->SortComparator((TitleId)item1, (TitleId)item2, sort_data);
+	return order_to_int(cmp);
 }
 
 void wxGameList::SortEntries(int column)
@@ -565,7 +569,7 @@ void wxGameList::SortEntries(int column)
 	case ColumnRegion:
 	case ColumnTitleID:
 	{
-		SortData data{this, ItemColumns{column}, ascending ? 1 : -1};
+		SortData data{this, ItemColumns{column}, ascending};
 		SortItems(SortFunction, (wxIntPtr)&data);
 		ShowSortIndicator(column, ascending);
 		break;
@@ -1092,7 +1096,10 @@ int wxGameList::FindInsertPosition(TitleId titleId)
 
 	for (int i = 0; i < itemCount; i++)
 	{
-		if (SortComparator(titleId, (uint64)GetItemData(i), &data) <= 0)
+		auto titleId2 = (TitleId)GetItemData(i);
+		if (!data.asc)
+			std::swap(titleId, titleId2);
+		if (SortComparator(titleId, titleId2, &data) <= 0)
 			return i;
 	}
 	return itemCount;
@@ -1176,7 +1183,7 @@ void wxGameList::OnGameEntryUpdatedByTitleId(wxTitleIdEvent& event)
 
 		const auto region_text = fmt::format("{}", gameInfo.GetRegion());
 		SetItem(index, ColumnRegion, wxGetTranslation(region_text));
-        SetItem(index, ColumnTitleID, fmt::format("{:016x}", baseTitleId));
+		SetItem(index, ColumnTitleID, fmt::format("{:016x}", baseTitleId));
 	}
 	else if (m_style == Style::kIcons)
 	{
@@ -1198,7 +1205,7 @@ void wxGameList::OnItemActivated(wxListEvent& event)
 	if (selection == wxNOT_FOUND)
 		return;
 
-	const auto item_data = (uint64)GetItemData(selection);
+	const auto item_data = (TitleId)GetItemData(selection);
 	if(item_data == kDefaultEntryData)
 	{
 		const wxCommandEvent open_settings_event(wxEVT_OPEN_SETTINGS);
@@ -1226,14 +1233,14 @@ void wxGameList::OnTimer(wxTimerEvent& event)
 		const auto item = this->HitTest(m_mouse_position, flag);
 		if(item != wxNOT_FOUND )
 		{
-			//const auto title_id = (uint64_t)GetItemData(item);
-			//auto entry = GetGameEntry(title_id);
-			//if (entry && entry->is_update)
+			// const auto title_id = (TitleId)GetItemData(item);
+			// auto entry = GetGameEntry(title_id);
+			// if (entry && entry->is_update)
 			//{
 			//	m_tooltip_window->SetPosition(wxPoint(m_mouse_position.x + 15, m_mouse_position.y + 15));
 			//	m_tooltip_window->SendSizeEvent();
 			//	m_tooltip_window->Show();
-			//}
+			// }
 		}
 	}
 
@@ -1661,7 +1668,8 @@ void wxGameList::CreateShortcut(GameInfo2& gameInfo)
 			hres = shellLinkFile->Save(outputPath.wc_str(), TRUE);
 		}
 	}
-	if (!SUCCEEDED(hres)) {
+	if (FAILED(hres))
+	{
 		auto errorMsg = formatWxString(_("Failed to save shortcut to {}"), outputPath);
 		wxMessageBox(errorMsg, _("Error"), wxOK | wxCENTRE | wxICON_ERROR);
 	}
