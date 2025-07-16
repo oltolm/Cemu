@@ -144,7 +144,6 @@ target_link_libraries(CemuBin PRIVATE
 	CemuGui
 	CemuInput
 	CemuUtil
-	OpenGL::GL
 	SDL2::SDL2
 )
 

@@ -1,4 +1,4 @@
-add_library(CemuWxGui 
+add_library(CemuWxGui STATIC
   canvas/IRenderCanvas.h
   canvas/OpenGLCanvas.cpp
   canvas/OpenGLCanvas.h
@@ -112,8 +112,6 @@ add_library(CemuWxGui
   windows/TextureRelationViewer
   windows/TextureRelationViewer/TextureRelationWindow.cpp
   windows/TextureRelationViewer/TextureRelationWindow.h
-  wxcomponents/checktree.cpp
-  wxcomponents/checktree.h
   wxgui.h
   wxHelper.h
 )
@@ -126,20 +124,16 @@ target_include_directories(CemuWxGui PUBLIC "../")
 target_include_directories(CemuWxGui PUBLIC ${RAPIDJSON_INCLUDE_DIRS})
 
 target_link_libraries(CemuWxGui PRIVATE
-	CemuAudio
-	CemuCafe
-	CemuCommon
-	CemuComponents
-	CemuConfig
-	CemuInput
-	CemuResource
-	CemuUtil
-	Boost::headers
-	CURL::libcurl
-	libzip::zip
-	OpenSSL::Crypto
-	pugixml::pugixml
-	ZArchive::zarchive
+  CemuCommon
+  CemuResource
+  libzip::zip
+  ZArchive::zarchive
+  CemuComponents
+  SDL2::SDL2
+  pugixml::pugixml
+  CemuCafe
+  PUBLIC
+  CURL::libcurl
 )
 
 if(ENABLE_WXWIDGETS AND UNIX AND NOT APPLE)
@@ -161,7 +155,7 @@ if(UNIX AND NOT APPLE)
 endif()
 if (ENABLE_WXWIDGETS)
 	# PUBLIC because wx/app.h is included in CemuApp.h
-	target_link_libraries(CemuWxGui PUBLIC wx::base wx::core wx::gl wx::propgrid wx::xrc)
+	target_link_libraries(CemuWxGui PUBLIC wxWidgets::wxWidgets)
 endif()
 
 if(WIN32)
