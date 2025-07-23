@@ -45,13 +45,13 @@ public:
 	wxGameList(wxWindow* parent, wxWindowID id = wxID_ANY);
 	~wxGameList();
 
-	void SetStyle(Style style, bool save = true);
+	void SetStyle(long style, bool save = true);
 
 	void LoadConfig();
 	void SaveConfig(bool flush = false);
 	bool IsVisible(long item) const; // only available in wxwidgets 3.1.3
 
-	void ReloadGameEntries(bool cached = false);
+	void ReloadGameEntries();
 	void DeleteCachedStrings();
 
     void CreateShortcut(GameInfo2& gameInfo);
@@ -61,8 +61,6 @@ public:
 
 private:
 	std::atomic_bool m_exit = false;
-	Style m_style;
-	long GetStyleFlags(Style style) const;
 
 	const wxColour kUpdateColor{ wxSystemSettings::SelectLightDark(wxColour(195, 57, 57), wxColour(84, 29, 29)) };
 	const wxColour kFavoriteColor{ wxSystemSettings::SelectLightDark(wxColour(253, 246, 211), wxColour(82, 84, 48)) };

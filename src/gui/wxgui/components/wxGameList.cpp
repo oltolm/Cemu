@@ -136,7 +136,7 @@ bool writeICNS(const fs::path& pngPath, const fs::path& icnsPath) {
 }
 
 wxGameList::wxGameList(wxWindow* parent, wxWindowID id)
-	: wxListView(parent, id, wxDefaultPosition, wxDefaultSize, GetStyleFlags(Style::kList)), m_style(Style::kList)
+	: wxListView(parent, id, wxDefaultPosition, wxDefaultSize, wxLC_SINGLE_SEL | wxLC_REPORT)
 {
 	const auto& config = GetWxGUIConfig();
 
@@ -219,7 +219,7 @@ wxGameList::~wxGameList()
 void wxGameList::LoadConfig()
 {
 	const auto& config = GetWxGUIConfig();
-	SetStyle((Style)config.game_list_style, false);
+	SetStyle(config.game_list_style, false);
 
 	if (!config.game_list_column_order.empty())
 	{
@@ -332,7 +332,7 @@ void wxGameList::SaveConfig(bool flush)
 {
 	auto& config = GetWxGUIConfig();
 
-	config.game_list_style = (int)m_style;
+	config.game_list_style = (int)GetWindowStyleFlag();
 	#ifdef wxHAS_LISTCTRL_COLUMN_ORDER
 	config.game_list_column_order = fmt::format("{}", GetColumnsOrder());
 	#endif
@@ -350,7 +350,7 @@ bool wxGameList::IsVisible(long item) const
 	return visible;
 }
 
-void wxGameList::ReloadGameEntries(bool cached)
+void wxGameList::ReloadGameEntries()
 {
 	wxWindowUpdateLocker windowlock(this);
 	DeleteAllItems();
@@ -389,15 +389,14 @@ std::string wxGameList::GetNameByTitleId(uint64 titleId)
 	return name;
 }
 
-void wxGameList::SetStyle(Style style, bool save)
+void wxGameList::SetStyle(long style, bool save)
 {
-	if (m_style == style)
+	if (HasFlag(style & (wxLC_REPORT | wxLC_ICON | wxLC_SMALL_ICON)))
 		return;
 
 	wxWindowUpdateLocker updatelock(this);
 
-	m_style = style;
-	SetWindowStyleFlag(GetStyleFlags(m_style));
+	SetSingleStyle(style);
 
 	uint64 selected_title_id = 0;
 	auto selection = GetFirstSelected();
@@ -407,16 +406,8 @@ void wxGameList::SetStyle(Style style, bool save)
 		selection = wxNOT_FOUND;
 	}
 
-	switch(style)
-	{
-	case Style::kIcons:
-		wxListCtrl::SetNormalImages(m_image_list_data);
-		break;
-	case Style::kSmallIcons:
-	case Style::kList:
-		wxListCtrl::SetSmallImages(m_image_list_small_data);
-		break;
-	}
+	wxListCtrl::SetNormalImages(m_image_list_data);
+	wxListCtrl::SetSmallImages(m_image_list_small_data);
 
 	ReloadGameEntries();
 	SortEntries();
@@ -430,28 +421,12 @@ void wxGameList::SetStyle(Style style, bool save)
 
 	if(save)
 	{
-		GetWxGUIConfig().game_list_style = (int)m_style;
+		GetWxGUIConfig().game_list_style = (int)GetWindowStyleFlag();
 		GetConfigHandle().Save();
 	}
 
-	if (style == Style::kList)
+	if (style & wxLC_REPORT)
 		ApplyGameListColumnWidths();
-}
-
-long wxGameList::GetStyleFlags(Style style) const
-{
-	switch (style)
-	{
-	case Style::kList:
-		return (wxLC_SINGLE_SEL | wxLC_REPORT);
-	case Style::kIcons:
-		return (wxLC_SINGLE_SEL | wxLC_ICON);
-	case Style::kSmallIcons:
-		return (wxLC_SINGLE_SEL | wxLC_ICON);
-	default:
-		wxASSERT(false);
-		return (wxLC_SINGLE_SEL | wxLC_REPORT);
-	}
 }
 
 void wxGameList::UpdateItemColors(sint32 startIndex)
@@ -580,7 +555,7 @@ void wxGameList::SortEntries(int column)
 void wxGameList::OnKeyDown(wxListEvent& event)
 {
 	event.Skip();
-	if (m_style != Style::kList)
+	if (!HasFlag(wxLC_REPORT))
 		return;
 
 	const auto keycode = event.GetKeyCode();
@@ -696,9 +671,9 @@ void wxGameList::OnContextMenu(wxContextMenuEvent& event)
 
 	menu.Append(kContextMenuRefreshGames, _("&Refresh game list"))->Enable(!CafeTitleList::IsScanning());
 	menu.AppendSeparator();
-	menu.AppendRadioItem(kContextMenuStyleList, _("Style: &List"))->Check(m_style == Style::kList);
-	menu.AppendRadioItem(kContextMenuStyleIcon, _("Style: &Icons"))->Check(m_style == Style::kIcons);
-	menu.AppendRadioItem(kContextMenuStyleIconSmall, _("Style: &Small Icons"))->Check(m_style == Style::kSmallIcons);
+	menu.AppendRadioItem(kContextMenuStyleList, _("Style: &List"))->Check(HasFlag(wxLC_REPORT));
+	menu.AppendRadioItem(kContextMenuStyleIcon, _("Style: &Icons"))->Check(HasFlag(wxLC_ICON));
+	menu.AppendRadioItem(kContextMenuStyleIconSmall, _("Style: &Small Icons"))->Check(HasFlag(wxLC_SMALL_ICON));
 	PopupMenu(&menu);
 }
 
@@ -741,7 +716,7 @@ void wxGameList::OnContextMenuSelected(wxCommandEvent& event)
 						const auto id = (uint64)GetItemData(i);
 						if (id == title_id)
 						{
-							if (m_style == Style::kList)
+							if (HasFlag(wxLC_REPORT))
 								SetItem(i, ColumnName, wxHelper::FromUtf8(GetNameByTitleId(title_id)));
 							break;
 						}
@@ -854,16 +829,16 @@ void wxGameList::OnContextMenuSelected(wxCommandEvent& event)
 	switch (event.GetId())
 	{
 	case kContextMenuRefreshGames:
-		ReloadGameEntries(false);
+		ReloadGameEntries();
 		break;
 	case kContextMenuStyleList:
-		SetStyle(Style::kList);
+		SetStyle(wxLC_REPORT);
 		break;
 	case kContextMenuStyleIcon:
-		SetStyle(Style::kIcons);
+		SetStyle(wxLC_ICON);
 		break;
 	case kContextMenuStyleIconSmall:
-		SetStyle(Style::kSmallIcons);
+		SetStyle(wxLC_SMALL_ICON);
 		break;
 	}
 }
@@ -1047,7 +1022,7 @@ void wxGameList::OnColumnResize(wxListEvent& event)
 {
 	event.Skip();
 
-	if(m_style != Style::kList)
+	if(!(HasFlag(wxLC_REPORT)))
 		return;
 
 	const int column = event.GetColumn();
@@ -1117,18 +1092,8 @@ void wxGameList::OnGameEntryUpdatedByTitleId(wxTitleIdEvent& event)
 	TitleId baseTitleId = gameInfo.GetBaseTitleId();
 	bool isNewEntry = false;
 
-	if (m_style == Style::kIcons)
-	{
-		wxListCtrl::SetNormalImages(m_image_list_data);
-	}
-	else if (m_style == Style::kSmallIcons)
-	{
-		wxListCtrl::SetSmallImages(m_image_list_small_data);
-	}
-	else if (m_style == Style::kList)
-	{
-		wxListCtrl::SetSmallImages(m_image_list_small_data);
-	}
+	wxListCtrl::SetNormalImages(m_image_list_data);
+	wxListCtrl::SetSmallImages(m_image_list_small_data);
 
 	int icon = -1; /* 0 is the default empty icon */
 	int icon_small = -1; /* 0 is the default empty icon */
@@ -1143,7 +1108,7 @@ void wxGameList::OnGameEntryUpdatedByTitleId(wxTitleIdEvent& event)
 		isNewEntry = true;
 	}
 
-	if (m_style == Style::kList)
+	if (HasFlag(wxLC_REPORT))
 	{
 		SetItemColumnImage(index, ColumnIcon, icon_small);
 
@@ -1197,11 +1162,11 @@ void wxGameList::OnGameEntryUpdatedByTitleId(wxTitleIdEvent& event)
 		SetItem(index, ColumnRegion, wxGetTranslation(region_text));
         SetItem(index, ColumnTitleID, fmt::format("{:016x}", baseTitleId));
 	}
-	else if (m_style == Style::kIcons)
+	else if (HasFlag(wxLC_ICON))
 	{
 		SetItemImage(index, icon);
 	}
-	else if (m_style == Style::kSmallIcons)
+	else if (HasFlag(wxLC_SMALL_ICON))
 	{
 		SetItemImage(index, icon_small);
 	}
