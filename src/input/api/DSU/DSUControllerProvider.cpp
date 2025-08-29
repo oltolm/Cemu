@@ -372,6 +372,8 @@ void DSUControllerProvider::reader_thread()
 				integrate_motion(index, *rsp);
 				break;
 			}
+		case MessageType::Rumble:
+			break;
 		}
 
 		if (index != 0xFF)
