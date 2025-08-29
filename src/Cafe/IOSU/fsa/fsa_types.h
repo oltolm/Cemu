@@ -12,7 +12,7 @@ enum class FS_RESULT : sint32 // aka FSStatus
 	PERMISSION_ERROR = -10,
 
 	FATAL_ERROR = -0x400,
-	ERR_PLACEHOLDER = -9999, // used when exact error code has yet to be determined
+	ERR_PLACEHOLDER = (uint8)-9999, // used when exact error code has yet to be determined
 };
 
 enum class FSA_RESULT : sint32 // aka FSError/FSAStatus
