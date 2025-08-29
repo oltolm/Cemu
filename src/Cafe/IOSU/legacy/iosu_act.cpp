@@ -179,6 +179,10 @@ static const auto ACTResult_NotANetworkAccount = BUILD_NN_RESULT(NN_RESULT_LEVEL
 
 nnResult ServerActErrorCodeToNNResult(NAPI::ACT_ERROR_CODE ec)
 {
+#ifndef _MSC_VER
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+#endif
 	switch (ec)
 	{
 	case (NAPI::ACT_ERROR_CODE)1:
@@ -376,6 +380,9 @@ nnResult ServerActErrorCodeToNNResult(NAPI::ACT_ERROR_CODE ec)
 	default:
 		break;
 	}
+#ifndef _MSC_VER
+#pragma GCC diagnostic pop
+#endif
 	cemuLog_log(LogType::Force, "Received unknown ACT error code {}", (uint32)ec);
 	return nnResultStatus(NN_RESULT_MODULE_NN_ACT, NN_ERROR_CODE::ACT_UNKNOWN_SERVER_ERROR);
 }
