@@ -803,12 +803,12 @@ static GLuint GetGLBlendFactor(Latte::LATTE_CB_BLENDN_CONTROL::E_BLENDFACTOR ble
 	}
 	if (blendFactorU >= (sizeof(table_glBlendSrcDst) / sizeof(table_glBlendSrcDst[0])))
 	{
-		debug_printf("GetGLBlendFactor: Constant 0x%x out of range\n", blendFactor);
+		debug_printf("GetGLBlendFactor: Constant 0x%x out of range\n", static_cast<unsigned int>(blendFactor));
 		return GL_ZERO;
 	}
 	if (table_glBlendSrcDst[blendFactorU] == -1)
 	{
-		debug_printf("GetGLBlendFactor: Constant 0x%x is invalid\n", blendFactor);
+		debug_printf("GetGLBlendFactor: Constant 0x%x is invalid\n", static_cast<unsigned int>(blendFactor));
 		cemu_assert_debug(false);
 		return GL_ZERO;
 	}

@@ -488,8 +488,10 @@ wxString wxDownloadManagerList::GetTitleEntryText(const TitleEntry& entry, ItemC
 		else
 			return "Unknown status";
 	}
+	case ColumnMAX:
+		break;
 	}
-	
+
 	return wxEmptyString;
 }
 
