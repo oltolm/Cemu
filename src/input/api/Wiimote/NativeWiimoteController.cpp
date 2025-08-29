@@ -142,6 +142,11 @@ MotionSample NativeWiimoteController::get_nunchuck_motion_sample() const
 	return {};
 }
 
+constexpr uint64 operator+(WiimoteButtons wButtons, ClassicButtons cButtons)
+{
+	return static_cast<int>(wButtons) + static_cast<int>(cButtons);
+}
+
 std::string NativeWiimoteController::get_button_name(uint64 button) const
 {
 	switch (button)

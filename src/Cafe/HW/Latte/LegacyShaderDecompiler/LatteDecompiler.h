@@ -108,7 +108,7 @@ struct LatteDecompilerShaderResourceMapping
 	bool getUniformBufferBindingRange(sint32& minBinding, sint32& maxBinding)
 	{
 		sint32 minBindingPoint = 9999;
-		sint32 maxBindingPoint = -9999;
+		sint32 maxBindingPoint = (uint8)-9999;
 		if (uniformVarsBufferBindingPoint >= 0)
 		{
 			minBindingPoint = std::min(minBindingPoint, (sint32)uniformVarsBufferBindingPoint);
