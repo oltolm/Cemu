@@ -78,6 +78,14 @@ void LatteTCGenIR::CF_CALL_FS_emitFetchAttribute(LatteParsedFetchShaderAttribute
 				case LatteConst::VertexFetchFormat::VTX_FMT_8:
 					numComp = 1;
 					break;
+				case LatteConst::VertexFetchFormat::VTX_FMT_INVALID:
+				case LatteConst::VertexFetchFormat::VTX_FMT_32_32:
+				case LatteConst::VertexFetchFormat::VTX_FMT_32_32_FLOAT:
+				case LatteConst::VertexFetchFormat::VTX_FMT_16_16_16:
+				case LatteConst::VertexFetchFormat::VTX_FMT_16_16_16_FLOAT:
+				case LatteConst::VertexFetchFormat::VTX_FMT_32_32_32:
+				case LatteConst::VertexFetchFormat::VTX_FMT_32_32_32_FLOAT:
+					break;
 				}
 
 				cemu_assert_debug(attribute.endianSwap == LatteConst::VertexFetchEndianMode::SWAP_NONE);

@@ -65,6 +65,10 @@ namespace ZpIR
 			return "bool";
 		case DataType::POINTER:
 			return "ptr";
+		case DataType::NONE:
+		case DataType::F32:
+		case DataType::F64:
+			break;
 		}
 		return "";
 	}
