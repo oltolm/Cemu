@@ -233,7 +233,7 @@ void gx2Export_GX2SetDepthBuffer(PPCInterpreter_t* hCPU)
 		regDepthBufferInfo |= (5 << 0);
 	else
 	{
-		debug_printf("Unsupported depth buffer format 0x%04x\n", depthBufferFormat);
+		debug_printf("Unsupported depth buffer format 0x%04x\n", static_cast<unsigned int>(depthBufferFormat));
 	}
 
 	// set color buffer pointer for render target
