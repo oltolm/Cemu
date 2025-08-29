@@ -26,7 +26,7 @@ void OpenGLRenderer::streamout_begin()
 		glTransformFeedbackPrimitiveMode = GL_POINTS;
 	else
 	{
-		debug_printf("Unsupported streamout primitive mode 0x%02x\n", primitiveMode);
+		debug_printf("Unsupported streamout primitive mode 0x%02x\n", static_cast<unsigned int>(primitiveMode));
 		cemu_assert_debug(false);
 	}
 	cemu_assert_debug(m_isXfbActive == false);
