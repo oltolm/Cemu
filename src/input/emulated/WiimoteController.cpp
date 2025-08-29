@@ -57,6 +57,16 @@ bool WiimoteController::set_default_mapping(const std::shared_ptr<ControllerBase
 			{kButtonId_Nunchuck_Right, kAxisXP},
 		};
 	}
+	case InputAPI::Keyboard:
+	case InputAPI::SDLController:
+	case InputAPI::XInput:
+	case InputAPI::DirectInput:
+	case InputAPI::DSUClient:
+	case InputAPI::GameCube:
+	case InputAPI::WGIGamepad:
+	case InputAPI::WGIRawController:
+	case InputAPI::MAX:
+		break;
 	}
 
 	bool mapping_updated = false;

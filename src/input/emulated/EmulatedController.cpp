@@ -14,6 +14,8 @@ std::string_view EmulatedController::type_to_string(Type type)
 	case Pro: return "Wii U Pro Controller";
 	case Classic: return "Wii U Classic Controller";
 	case Wiimote: return "Wiimote";
+	case MAX:
+		break;
 	}
 
 	throw std::runtime_error(fmt::format("unknown emulated controller: {}", to_underlying(type)));

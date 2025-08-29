@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 namespace LatteDecompiler
 {
 	void _emitUniformVariables(LatteDecompilerShaderContext* decompilerContext, RendererAPI rendererType, LatteDecompilerOutputUniformOffsets& uniformOffsets)
@@ -324,7 +325,7 @@ namespace LatteDecompiler
 				gsInputPrimitive = "lines_adjacency";
 			else
 			{
-				debug_printf("drawPrimitiveMode %d\n", drawPrimitiveMode);
+				debug_printf("drawPrimitiveMode %d\n", static_cast<int>(drawPrimitiveMode));
 				cemu_assert_debug(false);
 			}
 			// note: The input primitive type is not stored with the geometry shader object (and registers). Therefore we have to rely on whatever primitive mode was set for the draw call.

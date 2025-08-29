@@ -655,6 +655,10 @@ void OpenGLRenderer::buffer_bindUniformBuffer(LatteConst::ShaderType shaderType,
 	case LatteConst::ShaderType::Geometry:
 		bufferIndex += 64;
 		break;
+	case LatteConst::ShaderType::Reserved:
+	case LatteConst::ShaderType::Compute:
+	case LatteConst::ShaderType::TotalCount:
+		break;
 	}
 
 	if (offset == 0 && size == 0)

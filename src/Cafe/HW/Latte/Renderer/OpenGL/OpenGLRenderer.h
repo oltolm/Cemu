@@ -193,8 +193,8 @@ private:
 	float prevViewportWidth = 0;
 	float prevViewportHeight = 0;
 
-	float prevNearZ = -999999.0f;
-	float prevFarZ = -9999999.0f;
+	float prevNearZ = (uint8)-999999.0f;
+	float prevFarZ = (uint8)-9999999.0f;
 	bool _prevInvertY = false;
 	bool _prevHalfZ = false;
 

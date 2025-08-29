@@ -77,6 +77,10 @@ const char* _getTextureUnitVariablePrefixName(LatteConst::ShaderType mode)
 			return "textureUnitPS";
 	case LatteConst::ShaderType::Geometry:
 			return "textureUnitGS";
+	case LatteConst::ShaderType::Reserved:
+	case LatteConst::ShaderType::Compute:
+	case LatteConst::ShaderType::TotalCount:
+		break;
 	}
 	cemu_assert_unimplemented();
 	return nullptr;
@@ -3310,6 +3314,9 @@ void _emitExportCode(LatteDecompilerShaderContext* shaderContext, LatteDecompile
 						break;
 					case Latte::E_COMPAREFUNC::GEQUAL:
 						src->add(">=");
+						break;
+					case Latte::E_COMPAREFUNC::NEVER:
+					case Latte::E_COMPAREFUNC::ALWAYS:
 						break;
 					}
 					src->add(" uf_alphaTestRef");

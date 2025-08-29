@@ -219,7 +219,7 @@ void LatteTexture_updateTexturesForStage(LatteDecompilerShader* shaderContext, u
 		bool swizzleChanged = false;
 		if (textureView->baseTexture->swizzle != swizzle)
 		{
-			debug_printf("BaseSwizzle diff prev %08x new %08x rt %08x tm %d\n", textureView->baseTexture->swizzle, swizzle, textureView->baseTexture->lastRenderTargetSwizzle, textureView->baseTexture->tileMode);
+			debug_printf("BaseSwizzle diff prev %08x new %08x rt %08x tm %d\n", textureView->baseTexture->swizzle, swizzle, textureView->baseTexture->lastRenderTargetSwizzle, static_cast<int>(textureView->baseTexture->tileMode));
 			if (swizzle == textureView->baseTexture->lastRenderTargetSwizzle)
 			{
 				// last render to texture updated the swizzle and we can assume the texture data is still valid
@@ -233,7 +233,7 @@ void LatteTexture_updateTexturesForStage(LatteDecompilerShader* shaderContext, u
 		}
 		else if ((viewFirstMip + viewNumMips) > 1 && (textureView->baseTexture->physMipAddress != physMipAddr))
 		{
-			debug_printf("MipPhys/Swizzle change diff prev %08x new %08x tm %d\n", textureView->baseTexture->physMipAddress, physMipAddr, textureView->baseTexture->tileMode);
+			debug_printf("MipPhys/Swizzle change diff prev %08x new %08x tm %d\n", textureView->baseTexture->physMipAddress, physMipAddr, static_cast<int>(textureView->baseTexture->tileMode));
 			swizzleChanged = true;
 			cemu_assert_debug(physMipAddr != MPTR_NULL);
 		}
