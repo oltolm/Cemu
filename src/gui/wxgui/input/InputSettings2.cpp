@@ -967,6 +967,12 @@ void InputSettings2::on_controller_settings(wxCommandEvent& event)
 		wnd.ShowModal();
 		break;
 	}
+	#else
+	case InputAPI::Wiimote:
+		break;
 	#endif
+
+	case InputAPI::MAX:
+		break;
 	}
 }

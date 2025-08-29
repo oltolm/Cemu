@@ -50,7 +50,7 @@ struct PPCBasicBlockInfo
 IMLInstruction* PPCRecompilerImlGen_generateNewEmptyInstruction(ppcImlGenContext_t* ppcImlGenContext)
 {
 	IMLInstruction& inst = ppcImlGenContext->currentOutputSegment->imlList.emplace_back();
-	memset(&inst, 0x00, sizeof(IMLInstruction));
+	memset((void*)&inst, 0x00, sizeof(IMLInstruction));
 	return &inst;
 }
 
@@ -1889,7 +1889,7 @@ void PPCRecompiler_pushBackIMLInstructions(IMLSegment* imlSegment, sint32 index,
 
 	imlSegment->imlList.insert(imlSegment->imlList.begin() + index, shiftBackCount, {});
 
-	memset(imlSegment->imlList.data() + index, 0, sizeof(IMLInstruction) * shiftBackCount);
+	memset((void*)(imlSegment->imlList.data() + index), 0, sizeof(IMLInstruction) * shiftBackCount);
 
 	// fill empty space with NOP instructions
 	for (sint32 i = 0; i < shiftBackCount; i++)
@@ -1919,7 +1919,7 @@ IMLInstruction* PPCRecompiler_appendInstruction(IMLSegment* imlSegment)
 {
 	size_t index = imlSegment->imlList.size();
 	imlSegment->imlList.emplace_back();
-	memset(imlSegment->imlList.data() + index, 0, sizeof(IMLInstruction));
+	memset((void*)(imlSegment->imlList.data() + index), 0, sizeof(IMLInstruction));
 	return imlSegment->imlList.data() + index;
 }
 

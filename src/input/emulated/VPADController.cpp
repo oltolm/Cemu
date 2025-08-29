@@ -671,6 +671,15 @@ bool VPADController::set_default_mapping(const std::shared_ptr<ControllerBase>& 
 		
 		break;
 	}
+	case InputAPI::Keyboard:
+	case InputAPI::DirectInput:
+	case InputAPI::DSUClient:
+	case InputAPI::GameCube:
+	case InputAPI::Wiimote:
+	case InputAPI::WGIGamepad:
+	case InputAPI::WGIRawController:
+	case InputAPI::MAX:
+		break;
 	}
 
 	bool mapping_updated = false;
