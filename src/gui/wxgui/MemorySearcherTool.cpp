@@ -534,6 +534,8 @@ void MemorySearcherTool::RefreshResultList()
 				m_listResults->SetItem(i, 1, fmt::format("{}", value));
 				break;
 			}
+		case SearchDataType_None:
+			break;
 		}
 	}
 }
