@@ -121,49 +121,49 @@ void wxCheckTree::Init()
 
 	// Unchecked
 	renderer_dc.SelectObject(unchecked_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
-	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_NONE);
+	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height));
 
 	// Unchecked Mouse Over
 	renderer_dc.SelectObject(unchecked_mouse_over_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CURRENT);
 
 	// Unchecked and Disabled
 	renderer_dc.SelectObject(unchecked_disabled_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_DISABLED);
 
 	// Unchecked Left Down
 	renderer_dc.SelectObject(unchecked_left_down_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CURRENT | wxCONTROL_PRESSED);
 
 	// Checked
 	renderer_dc.SelectObject(checked_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CHECKED);
 
 	// Checked Mouse Over
 	renderer_dc.SelectObject(checked_mouse_over_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CHECKED | wxCONTROL_CURRENT);
 
 	// Checked Left Down
 	renderer_dc.SelectObject(checked_left_down_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CHECKED | wxCONTROL_CURRENT | wxCONTROL_PRESSED);
 
 	// Checked and Disabled
 	renderer_dc.SelectObject(checked_disabled_bmp);
-	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxSOLID));
+	renderer_dc.SetBackground(*wxTheBrushList->FindOrCreateBrush(GetBackgroundColour()));
 	renderer_dc.Clear();
 	wxRendererNative::Get().DrawCheckBox(this, renderer_dc, wxRect(0, 0, width, height), wxCONTROL_CHECKED | wxCONTROL_DISABLED);
 
@@ -180,22 +180,22 @@ void wxCheckTree::Init()
 
 	AssignStateImageList(states);
 
-	Connect(wxEVT_TREE_SEL_CHANGING, wxTreeEventHandler( wxCheckTree::On_Tree_Sel_Changed ), nullptr, this);
+	Bind(wxEVT_TREE_SEL_CHANGING, &wxCheckTree::On_Tree_Sel_Changed, this);
 
-	Connect(wxEVT_CHAR, wxKeyEventHandler( wxCheckTree::On_Char ), nullptr, this);
-	Connect(wxEVT_KEY_DOWN, wxKeyEventHandler( wxCheckTree::On_KeyDown ), nullptr, this);
-	Connect(wxEVT_KEY_UP, wxKeyEventHandler( wxCheckTree::On_KeyUp ), nullptr, this);
+	Bind(wxEVT_CHAR, &wxCheckTree::On_Char, this);
+	Bind(wxEVT_KEY_DOWN, &wxCheckTree::On_KeyDown, this);
+	Bind(wxEVT_KEY_UP, &wxCheckTree::On_KeyUp, this);
 
-	Connect(wxEVT_ENTER_WINDOW, wxMouseEventHandler( wxCheckTree::On_Mouse_Enter_Tree ), nullptr, this);
-	Connect(wxEVT_LEAVE_WINDOW, wxMouseEventHandler( wxCheckTree::On_Mouse_Leave_Tree ), nullptr, this);
-	Connect(wxEVT_LEFT_DCLICK, wxMouseEventHandler( wxCheckTree::On_Left_DClick ), nullptr, this);
-	Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler( wxCheckTree::On_Left_Down ), nullptr, this);
-	Connect(wxEVT_LEFT_UP, wxMouseEventHandler( wxCheckTree::On_Left_Up ), nullptr, this);
-	Connect(wxEVT_MOTION, wxMouseEventHandler( wxCheckTree::On_Mouse_Motion ), nullptr, this);
-	Connect(wxEVT_MOUSEWHEEL, wxMouseEventHandler( wxCheckTree::On_Mouse_Wheel ), nullptr, this);
+	Bind(wxEVT_ENTER_WINDOW, &wxCheckTree::On_Mouse_Enter_Tree, this);
+	Bind(wxEVT_LEAVE_WINDOW, &wxCheckTree::On_Mouse_Leave_Tree, this);
+	Bind(wxEVT_LEFT_DCLICK, &wxCheckTree::On_Left_DClick, this);
+	Bind(wxEVT_LEFT_DOWN, &wxCheckTree::On_Left_Down, this);
+	Bind(wxEVT_LEFT_UP, &wxCheckTree::On_Left_Up, this);
+	Bind(wxEVT_MOTION, &wxCheckTree::On_Mouse_Motion, this);
+	Bind(wxEVT_MOUSEWHEEL, &wxCheckTree::On_Mouse_Wheel, this);
 
-	Connect(wxEVT_SET_FOCUS, wxFocusEventHandler( wxCheckTree::On_Tree_Focus_Set ), nullptr, this);
-	Connect(wxEVT_KILL_FOCUS, wxFocusEventHandler( wxCheckTree::On_Tree_Focus_Lost ), nullptr, this);
+	Bind(wxEVT_SET_FOCUS, &wxCheckTree::On_Tree_Focus_Set, this);
+	Bind(wxEVT_KILL_FOCUS, &wxCheckTree::On_Tree_Focus_Lost, this);
 }
 
 void wxCheckTree::Sort(const wxTreeItemId& node, bool recursive)
