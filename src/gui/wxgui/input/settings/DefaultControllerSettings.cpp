@@ -22,8 +22,6 @@ DefaultControllerSettings::DefaultControllerSettings(wxWindow* parent, const wxP
 	m_settings = m_controller->get_settings();
 	m_rumble_backup = m_settings.rumble;
 
-	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-
 	auto* sizer = new wxBoxSizer(wxVERTICAL);
 
 	// options
