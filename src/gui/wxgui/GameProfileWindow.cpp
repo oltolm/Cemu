@@ -23,8 +23,6 @@ GameProfileWindow::GameProfileWindow(wxWindow* parent, uint64_t title_id)
 	m_game_profile.Reset();
 	m_game_profile.Load(title_id);
 
-	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-
 	auto* main_sizer = new wxBoxSizer(wxVERTICAL);
 
 	auto* m_notebook = new wxNotebook(this, wxID_ANY);
