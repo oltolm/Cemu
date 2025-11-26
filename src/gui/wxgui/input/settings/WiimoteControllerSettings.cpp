@@ -24,8 +24,6 @@ WiimoteControllerSettings::WiimoteControllerSettings(wxWindow* parent, const wxP
 	m_rumble_backup = m_settings.rumble;
 	m_packet_delay_backup = m_controller->get_packet_delay();
 
-	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-
 	auto* sizer = new wxBoxSizer(wxVERTICAL);
 
 	// extension info

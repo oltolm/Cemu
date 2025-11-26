@@ -69,8 +69,6 @@ using wxControllerPageData = wxCustomData<ControllerPage>;
 InputSettings2::InputSettings2(wxWindow* parent)
 	: wxDialog(parent, wxID_ANY, _("Input settings"))
 {
-	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-
 	g_inputConfigWindowHasFocus = true;
 
 	m_connected = wxHelper::LoadThemedBitmapFromPNG(INPUT_CONNECTED_png, sizeof(INPUT_CONNECTED_png), wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
