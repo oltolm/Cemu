@@ -80,7 +80,7 @@ wxPanel* TitleManager::CreateTitleManagerPage()
 	sizer->Add(new wxStaticLine(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL), 0, wxEXPAND | wxALL, 5);
 
 	m_title_list = new wxTitleManagerList(panel);
-	m_title_list->SetSizeHints(800, 600);
+	m_title_list->SetMinSize(wxSize(800, 600));
 	m_title_list->Bind(wxEVT_LIST_ITEM_SELECTED, &TitleManager::OnTitleSelected, this);
 	sizer->Add(m_title_list, 1, wxALL | wxEXPAND, 5);
 
@@ -222,7 +222,7 @@ wxPanel* TitleManager::CreateDownloadManagerPage()
 	}
 	
 	m_download_list = new wxDownloadManagerList(panel);
-	m_download_list->SetSizeHints(800, 600);
+	m_download_list->SetMinSize(wxSize(800, 600));
 	m_download_list->Bind(wxEVT_LIST_ITEM_SELECTED, &TitleManager::OnTitleSelected, this);
 	sizer->Add(m_download_list, 1, wxALL | wxEXPAND, 5);
 
