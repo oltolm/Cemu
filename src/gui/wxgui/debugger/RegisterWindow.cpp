@@ -31,7 +31,6 @@ RegisterWindow::RegisterWindow(DebuggerWindow2& parent, const wxPoint& main_posi
 	: wxFrame(&parent, wxID_ANY, _("Registers"), wxDefaultPosition, wxSize(400, 975), wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT),
 	m_prev_snapshot({}), m_show_double_values(true), m_context_ctrl(nullptr)
 {
-	SetSizeHints(wxDefaultSize, wxDefaultSize);
 	SetMaxSize({ 400, 975 });
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
