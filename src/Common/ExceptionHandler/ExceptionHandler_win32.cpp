@@ -282,6 +282,10 @@ LONG WINAPI cemu_unhandledExceptionFilter(EXCEPTION_POINTERS* pExceptionInfo)
 void ExceptionHandler_Init()
 {
 	SetUnhandledExceptionFilter(cemu_unhandledExceptionFilter);
+#ifdef CEMU_USE_ASAN
+	AddVectoredExceptionHandler(0, VectoredExceptionHandler);
+#else
 	AddVectoredExceptionHandler(1, VectoredExceptionHandler);
+#endif
 	SetErrorMode(SEM_FAILCRITICALERRORS);
 }
