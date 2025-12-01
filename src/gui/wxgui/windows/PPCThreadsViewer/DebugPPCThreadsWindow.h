@@ -2,6 +2,10 @@
 
 #include <wx/wx.h>
 
+class wxListView;
+
+class wxListView;
+
 class DebugPPCThreadsWindow: public wxFrame
 {
 public:
