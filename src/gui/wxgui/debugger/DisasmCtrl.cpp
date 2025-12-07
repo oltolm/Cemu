@@ -854,8 +854,7 @@ void DisasmCtrl::GoToAddressDialog()
 	{
 		ExpressionParser parser;
 
-		auto value = goto_dialog.GetValue().ToStdString();
-		std::transform(value.begin(), value.end(), value.begin(), tolower);
+		auto value = goto_dialog.GetValue().Lower().ToStdString();
 
 		// trim any leading spaces
 		while(!value.empty() && value[0] == ' ')

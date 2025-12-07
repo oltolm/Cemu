@@ -267,8 +267,7 @@ void BreakpointWindow::OnContextMenuClick(wxCommandEvent& evt)
 	{
 		ExpressionParser parser;
 
-		auto value = goto_dialog.GetValue().ToStdString();
-		std::transform(value.begin(), value.end(), value.begin(), tolower);
+		auto value = goto_dialog.GetValue().Lower().ToStdString();
 
 		uint32_t newBreakpointAddress = 0;
 		try

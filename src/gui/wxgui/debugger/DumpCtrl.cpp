@@ -199,8 +199,7 @@ void DumpCtrl::GoToAddressDialog()
 	{
 		ExpressionParser parser;
 
-		auto value = goto_dialog.GetValue().ToStdString();
-		std::transform(value.begin(), value.end(), value.begin(), tolower);
+		auto value = goto_dialog.GetValue().Lower().ToStdString();
 
 		debugger_addParserSymbols(parser);
 
