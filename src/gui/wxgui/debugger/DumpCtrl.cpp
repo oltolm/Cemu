@@ -181,7 +181,8 @@ void DumpCtrl::OnMouseDClick(const wxPoint& position, uint32 line)
 		wxTextEntryDialog set_value_dialog(this, _("Enter a new value."), wxString::Format(_("Set byte at address %08x"), offset), wxString::Format("%02x", value));
 		if (set_value_dialog.ShowModal() == wxID_OK)
 		{
-			const uint8 new_value = std::stoul(set_value_dialog.GetValue().ToStdString(), nullptr, 16);
+			uint32 new_value;
+			set_value_dialog.GetValue().ToUInt(&new_value, 16);
 			memory_writeU8(offset, new_value);
 			wxRect update_rect(0, line * m_line_height, GetSize().x, m_line_height);
 			RefreshControl(&update_rect);

@@ -348,7 +348,8 @@ void RegisterWindow::OnMouseDClickEvent(wxMouseEvent& event)
 		wxTextEntryDialog set_value_dialog(this, _("Enter a new value."), wxString::Format(_("Set R%d value"), register_index), wxString::Format("%08x", register_value));
 		if (set_value_dialog.ShowModal() == wxID_OK)
 		{
-			const uint32 new_value = std::stoul(set_value_dialog.GetValue().ToStdString(), nullptr, 16);
+			uint32 new_value;
+			set_value_dialog.GetValue().ToUInt(&new_value, 16);
 			debuggerState.debugSession.hCPU->gpr[register_index] = new_value;
 			debuggerState.debugSession.ppcSnapshot.gpr[register_index] = new_value;
 			OnUpdateView();
@@ -364,7 +365,8 @@ void RegisterWindow::OnMouseDClickEvent(wxMouseEvent& event)
 		wxTextEntryDialog set_value_dialog(this, _("Enter a new value."), wxString::Format(_("Set FP0_%d value"), register_index), wxString::Format("%lf", register_value));
 		if (set_value_dialog.ShowModal() == wxID_OK)
 		{
-			const double new_value = std::stod(set_value_dialog.GetValue().ToStdString());
+			double new_value;
+			set_value_dialog.GetValue().ToDouble(&new_value);
 			debuggerState.debugSession.hCPU->fpr[register_index].fp0 = new_value;
 			debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp0 = new_value;
 			OnUpdateView();
@@ -380,7 +382,8 @@ void RegisterWindow::OnMouseDClickEvent(wxMouseEvent& event)
 		wxTextEntryDialog set_value_dialog(this, _("Enter a new value."), wxString::Format(_("Set FP1_%d value"), register_index), wxString::Format("%lf", register_value));
 		if (set_value_dialog.ShowModal() == wxID_OK)
 		{
-			const double new_value = std::stod(set_value_dialog.GetValue().ToStdString());
+			double new_value;
+			set_value_dialog.GetValue().ToDouble(&new_value);
 			debuggerState.debugSession.hCPU->fpr[register_index].fp1 = new_value;
 			debuggerState.debugSession.ppcSnapshot.fpr[register_index].fp1 = new_value;
 			OnUpdateView();

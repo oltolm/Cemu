@@ -174,7 +174,8 @@ void BreakpointWindow::OnLeftDClick(wxMouseEvent& event)
 	if(x <= address_width)
 	{
 		const auto item = m_breakpoints->GetItemText(index, ColumnAddress);
-		const auto address = std::stoul(item.ToStdString(), nullptr, 16);
+		uint32 address;
+		item.ToUInt(&address, 16);
 		debuggerState.debugSession.instructionPointer = address;
 		g_debuggerDispatcher.MoveIP();
 		return;
@@ -193,8 +194,9 @@ void BreakpointWindow::OnLeftDClick(wxMouseEvent& event)
 			return;
 
 		const auto item = m_breakpoints->GetItemText(index, ColumnAddress);
-		const auto address = std::stoul(item.ToStdString(), nullptr, 16);
-		
+		uint32 address;
+		item.ToUInt(&address, 16);
+
 		auto it = debuggerState.breakpoints.begin();
 		std::advance(it, index);
 

@@ -124,8 +124,8 @@ void ModuleWindow::OnLeftDClick(wxMouseEvent& event)
 	if (selected == wxNOT_FOUND)
 		return;
 	const auto text = m_modules->GetItemText(selected, ColumnAddress);
-	const auto address = std::stoul(text.ToStdString(), nullptr, 16);
-	if (address == 0)
+	uint32 address;
+	if (!text.ToUInt(&address, 16))
 		return;
 	debuggerState.debugSession.instructionPointer = address;
 	g_debuggerDispatcher.MoveIP();
