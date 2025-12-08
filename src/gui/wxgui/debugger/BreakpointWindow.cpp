@@ -1,7 +1,9 @@
+#include "RegisterWindow.h"
 #include "wxgui/wxgui.h"
 #include "wxgui/debugger/BreakpointWindow.h"
 
 #include <sstream>
+#include <wx/event.h>
 
 #include "wxgui/debugger/DebuggerWindow2.h"
 #include "Cafe/HW/Espresso/Debugger/Debugger.h"
@@ -25,8 +27,8 @@ enum ItemColumns
 	ColumnComment,
 };
 
-BreakpointWindow::BreakpointWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size)
-	: wxFrame(&parent, wxID_ANY, _("Breakpoints"), wxDefaultPosition, wxSize(420, 250), wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT)
+BreakpointWindow::BreakpointWindow(wxWindow& parent)
+	: wxPanel(&parent)
 {
 	wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -64,14 +66,13 @@ BreakpointWindow::BreakpointWindow(DebuggerWindow2& parent, const wxPoint& main_
 
 	this->Centre(wxBOTH);
 
-	if (parent.GetConfig().data().pin_to_main)
-		OnMainMove(main_position, main_size);
-
 	m_breakpoints->Bind(wxEVT_LIST_ITEM_CHECKED, &BreakpointWindow::OnBreakpointToggled, this);
 	m_breakpoints->Bind(wxEVT_LIST_ITEM_UNCHECKED, &BreakpointWindow::OnBreakpointToggled, this);
 	m_breakpoints->Bind(wxEVT_LEFT_DCLICK, &BreakpointWindow::OnLeftDClick, this);
 	m_breakpoints->Bind(wxEVT_RIGHT_DOWN, &BreakpointWindow::OnRightDown, this);
 
+	Bind(wxEVT_UPDATE_VIEW, &BreakpointWindow::OnUpdateView, this);
+	Bind(wxEVT_BREAKPOINT_CHANGE, &BreakpointWindow::OnUpdateView, this);
 	OnUpdateView();
 }
 
@@ -83,15 +84,9 @@ BreakpointWindow::~BreakpointWindow()
 	m_breakpoints->Unbind(wxEVT_RIGHT_DOWN, &BreakpointWindow::OnRightDown, this);
 }
 
-void BreakpointWindow::OnMainMove(const wxPoint& main_position, const wxSize& main_size)
+void BreakpointWindow::OnUpdateView(wxCommandEvent& event)
 {
-	wxSize size(420, 250);
-	this->SetSize(size);
-
-	wxPoint position = main_position;
-	position.x -= 420;
-	position.y += main_size.y - 250;
-	this->SetPosition(position);
+	OnUpdateView();
 }
 
 void BreakpointWindow::OnUpdateView()

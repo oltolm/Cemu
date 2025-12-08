@@ -1,10 +1,18 @@
 #include "Cafe/HW/Latte/Renderer/Renderer.h"
+#include "debugger/BreakpointWindow.h"
+#include "debugger/DumpWindow.h"
+#include "debugger/ModuleWindow.h"
+#include "debugger/RegisterWindow.h"
+#include "debugger/SymbolWindow.h"
 #include "interface/WindowSystem.h"
 #include "wxCemuConfig.h"
 #include "wxgui/wxgui.h"
 #include "wxgui/MainWindow.h"
 
+#include <wx/aui/framemanager.h>
+#include <wx/gdicmn.h>
 #include <wx/mstream.h>
+#include <wx/types.h>
 
 #include "wxgui/GameUpdateWindow.h"
 #include "wxgui/PadViewFrame.h"
@@ -311,6 +319,7 @@ MainWindow::MainWindow()
 	wxApp::s_macAboutMenuItemId = MAINFRAME_MENU_ID_HELP_ABOUT;
 	wxApp::s_macPreferencesMenuItemId = MAINFRAME_MENU_ID_OPTIONS_MAC_SETTINGS;
 #endif
+	g_debuggerDispatcher.SetDebuggerCallbacks(this);
 	g_window_info.window_main = initHandleContextFromWxWidgetsWindow(this);
 	g_mainFrame = this;
 	CafeSystem::SetImplementation(this);
@@ -386,6 +395,57 @@ MainWindow::MainWindow()
 	{
 			g_gdbstub = std::make_unique<GDBServer>(GetConfig().gdb_port);
 	}
+
+	m_register_window = new RegisterWindow(*this);
+	m_dump_window = new DumpWindow(*this);
+	m_breakpoint_window = new BreakpointWindow(*this);
+	m_module_window = new ModuleWindow(*this);
+	m_symbol_window = new SymbolWindow(*this);
+	m_debugger_window = new DebuggerWindow2(*this);
+
+	m_debugManager = new wxAuiManager(this, wxAUI_MGR_RECTANGLE_HINT);
+	m_debugManager->AddPane(m_debugger_window, wxAuiPaneInfo()
+												   .Name("PPCDebugger")
+												   .Caption("PPC Debugger")
+												   .Show(true)
+												   .CloseButton()
+												   .Top());
+	m_debugManager->AddPane(m_main_panel, wxAuiPaneInfo()
+											  .Name("Main")
+											  .CenterPane()
+											  .CloseButton(false)
+											  .CaptionVisible(false));
+	m_debugManager->AddPane(m_register_window, wxAuiPaneInfo()
+												   .Name("Registers")
+												   .Caption("Registers")
+												   .CloseButton()
+												   .CaptionVisible()
+												   .Right());
+	m_debugManager->AddPane(m_dump_window, wxAuiPaneInfo()
+											   .Name("MemoryDump")
+											   .Caption("Memory Dump")
+											   .CloseButton()
+											   .CaptionVisible()
+											   .Bottom());
+	m_debugManager->AddPane(m_symbol_window, wxAuiPaneInfo()
+												 .Name("Symbols")
+												 .Caption("Symbols")
+												 .CloseButton()
+												 .CaptionVisible()
+												 .Left());
+	m_debugManager->AddPane(m_breakpoint_window, wxAuiPaneInfo()
+													 .Name("Breakpoints")
+													 .Caption("Breakpoints")
+													 .CloseButton()
+													 .CaptionVisible()
+													 .Left());
+	m_debugManager->AddPane(m_module_window, wxAuiPaneInfo()
+												 .Name("Modules")
+												 .Caption("Modules")
+												 .CloseButton()
+												 .CaptionVisible()
+												 .Left());
+	m_debugManager->Update();
 }
 
 MainWindow::~MainWindow()
@@ -836,6 +896,7 @@ void MainWindow::TogglePadView()
 #ifndef DBT_DEVNODES_CHANGED
 #define DBT_DEVNODES_CHANGED (0x0007)
 #endif
+#if 0
 WXLRESULT MainWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 {
 	if (nMsg == WM_DEVICECHANGE)
@@ -848,6 +909,7 @@ WXLRESULT MainWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
 
 	return wxFrame::MSWWindowProc(nMsg, wParam, lParam);
 }
+#endif
 #endif
 
 void MainWindow::OpenSettings()
@@ -1194,12 +1256,13 @@ void MainWindow::OnDebugViewPPCThreads(wxCommandEvent& event)
 
 void MainWindow::OnDebugViewPPCDebugger(wxCommandEvent& event)
 {
-	if (m_debugger_window && m_debugger_window->IsShown())
-	{
-		m_debugger_window->Close();
-		m_debugger_window = nullptr;
-		return;
-	}
+	// if (m_debugger_window && m_debugger_window->IsShown())
+	// {
+	// 	m_debugMenu->Check(MAINFRAME_MENU_ID_DEBUG_VIEW_PPC_DEBUGGER, false);
+	// 	m_debugger_window->Close();
+	// 	m_debugger_window = nullptr;
+	// 	return;
+	// }
 
 	auto rect = GetDesktopRect();
 	/*
@@ -1213,9 +1276,9 @@ void MainWindow::OnDebugViewPPCDebugger(wxCommandEvent& event)
 	pos.y = std::min(pos.y + 200, rect.GetHeight() - 400);
 	this->SetPosition(pos);
 
-	m_debugger_window = new DebuggerWindow2(*this, rect);
-	m_debugger_window->Bind(wxEVT_CLOSE_WINDOW, &MainWindow::OnDebuggerClose, this);
-	m_debugger_window->Show(true);
+	// m_debugger_window = new DebuggerWindow2(*this, rect);
+	// m_debugger_window->Bind(wxEVT_CLOSE_WINDOW, &MainWindow::OnDebuggerClose, this);
+	// m_debugger_window->Show(true);
 }
 
 void MainWindow::OnDebugViewAudioDebugger(wxCommandEvent& event)
@@ -1577,7 +1640,13 @@ void MainWindow::OnGesturePan(wxPanGestureEvent& event)
 void MainWindow::OnGameLoaded()
 {
 	if (m_debugger_window)
+	{
 		m_debugger_window->OnGameLoaded();
+		m_dump_window->OnGameLoaded();
+		m_module_window->OnGameLoaded();
+		m_breakpoint_window->OnGameLoaded();
+		m_symbol_window->OnGameLoaded();
+	}
 }
 
 void MainWindow::AsyncSetTitle(std::string_view windowTitle)
@@ -1665,9 +1734,6 @@ void MainWindow::OnSizeEvent(wxSizeEvent& event)
 	g_window_info.phys_height = ToPhys(client_size.GetHeight());
 	g_window_info.dpi_scale = GetDPIScaleFactor();
 
-	if (m_debugger_window && m_debugger_window->IsShown())
-		m_debugger_window->OnParentMove(GetPosition(), event.GetSize());
-
 	event.Skip();
 
 	VsyncDriver_notifyWindowPosChanged();
@@ -1689,14 +1755,12 @@ void MainWindow::OnMove(wxMoveEvent& event)
 	if (!IsMaximized() && !WindowSystem::IsFullScreen())
 		m_restored_position = GetPosition();
 
-	if (m_debugger_window && m_debugger_window->IsShown())
-		m_debugger_window->OnParentMove(GetPosition(), GetSize());
 	VsyncDriver_notifyWindowPosChanged();
 }
 
 void MainWindow::OnDebuggerClose(wxCloseEvent& event)
 {
-	m_debugger_window = nullptr;
+	// m_debugger_window = nullptr;
 	event.Skip();
 }
 
@@ -2474,4 +2538,48 @@ void MainWindow::CafeRecreateCanvas()
 bool MainWindow::FullscreenEnabled() const
 {
 	return LaunchSettings::FullscreenEnabled().value_or(GetWxGUIConfig().fullscreen);
+}
+
+void MainWindow::UpdateViewThreadsafe()
+{
+	auto* evt = new wxCommandEvent(wxEVT_UPDATE_VIEW);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::NotifyDebugBreakpointHit()
+{
+	auto* evt = new wxCommandEvent(wxEVT_BREAKPOINT_HIT);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::NotifyRun()
+{
+	auto* evt = new wxCommandEvent(wxEVT_RUN);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::MoveIP()
+{
+	auto* evt = new wxCommandEvent(wxEVT_MOVE_IP);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::NotifyModuleLoaded(void* module)
+{
+	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_MODULE_LOADED);
+	evt->SetClientData(module);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::NotifyGraphicPacksModified()
+{
+	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_GRAPHIC_PACKS_MODIFIED);
+	wxQueueEvent(this, evt);
+}
+
+void MainWindow::NotifyModuleUnloaded(void* module)
+{
+	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_MODULE_UNLOADED);
+	evt->SetClientData(module);
+	wxQueueEvent(this, evt);
 }

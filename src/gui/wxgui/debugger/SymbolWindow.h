@@ -1,21 +1,20 @@
 #pragma once
 
 #include "wxgui/debugger/SymbolCtrl.h"
-#include <wx/frame.h>
+#include <wx/event.h>
+#include <wx/panel.h>
 
-class DebuggerWindow2;
-
-class SymbolWindow : public wxFrame
+class SymbolWindow : public wxPanel
 {
-public:
-	SymbolWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size);
+  public:
+	SymbolWindow(wxWindow& parent);
 
-	void OnMainMove(const wxPoint& position, const wxSize& main_size);
 	void OnGameLoaded();
+	void OnGameLoaded(wxCommandEvent& event);
 
 	void OnLeftDClick(wxListEvent& event);
 
-private:
+  private:
 	wxTextCtrl* m_filter;
 	SymbolListCtrl* m_symbol_ctrl;
 

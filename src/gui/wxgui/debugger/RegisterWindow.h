@@ -1,19 +1,19 @@
 #pragma once
 #include "Cafe/HW/Espresso/Debugger/Debugger.h"
-#include <wx/frame.h>
+#include <wx/event.h>
+#include <wx/panel.h>
 
-class DebuggerWindow2;
 class wxTextCtrl;
 
-class RegisterWindow : public wxFrame
+class RegisterWindow : public wxPanel
 {
-public:
-	RegisterWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size);
+  public:
+	RegisterWindow(wxWindow& parent);
 
-	void OnMainMove(const wxPoint& position, const wxSize& main_size);
 	void OnUpdateView();
+	void OnUpdateView(wxCommandEvent& event);
 
-private:
+  private:
 	void OnMouseDClickEvent(wxMouseEvent& event);
 	void OnFPViewModePress(wxCommandEvent& event);
 	void OnValueContextMenu(wxContextMenuEvent& event);
