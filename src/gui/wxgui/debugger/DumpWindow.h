@@ -2,17 +2,14 @@
 
 #include "wxgui/debugger/DumpCtrl.h"
 
-class DebuggerWindow2;
-
-class DumpWindow : public wxFrame
+class DumpWindow : public wxPanel
 {
-public:
-	DumpWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size);
+  public:
+	DumpWindow(wxWindow& parent);
 
-	void OnMainMove(const wxPoint& position, const wxSize& main_size);
 	void OnGameLoaded();
 
-private:
+  private:
 	wxScrolledWindow* m_scrolled_window;
 	DumpCtrl* m_dump_ctrl;
 };
