@@ -2,6 +2,7 @@
 #include "wxgui/debugger/RegisterWindow.h"
 
 #include <sstream>
+#include <wx/event.h>
 
 #include "wxgui/debugger/DebuggerWindow2.h"
 #include "Cafe/HW/Espresso/Debugger/Debugger.h"
@@ -27,9 +28,9 @@ enum
 	kContextMenuGotoDump,
 };
 
-RegisterWindow::RegisterWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size)
-	: wxFrame(&parent, wxID_ANY, _("Registers"), wxDefaultPosition, wxSize(400, 975), wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT),
-	m_prev_snapshot({}), m_show_double_values(true), m_context_ctrl(nullptr)
+RegisterWindow::RegisterWindow(wxWindow& parent)
+	: wxPanel(&parent),
+	  m_prev_snapshot({}), m_show_double_values(true), m_context_ctrl(nullptr)
 {
 	SetMaxSize({ 400, 975 });
 	this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
@@ -122,22 +123,8 @@ RegisterWindow::RegisterWindow(DebuggerWindow2& parent, const wxPoint& main_posi
 	SetSizer(main_sizer);
 	Layout();
 
-	if (parent.GetConfig().data().pin_to_main)
-		OnMainMove(main_position, main_size);
-
 	//Bind(wxEVT_COMMAND_MENU_SELECTED, &RegisterWindow::OnValueContextMenuSelected, this, kContextMenuZero, kContextMenuGotoDump);
-}
-
-
-void RegisterWindow::OnMainMove(const wxPoint& main_position, const wxSize& main_size)
-{
-	wxSize size(400, 255 + main_size.y + 250);
-	this->SetSize(size);
-
-	wxPoint position = main_position;
-	position.x += main_size.x;
-	position.y -= 255;
-	this->SetPosition(position);
+	Bind(wxEVT_UPDATE_VIEW, &RegisterWindow::OnUpdateView, this);
 }
 
 void RegisterWindow::UpdateIntegerRegister(wxTextCtrl* label, wxTextCtrl* value, uint32 registerValue, bool hasChanged)
@@ -226,6 +213,11 @@ void RegisterWindow::UpdateIntegerRegister(wxTextCtrl* label, wxTextCtrl* value,
 	}
 
 	label->ChangeValue(wxEmptyString);
+}
+
+void RegisterWindow::OnUpdateView(wxCommandEvent& event)
+{
+	OnUpdateView();
 }
 
 void RegisterWindow::OnUpdateView()

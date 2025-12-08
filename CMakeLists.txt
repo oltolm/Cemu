@@ -24,7 +24,7 @@ if (ENABLE_VCPKG)
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/dependencies/vcpkg
 	OUTPUT_VARIABLE is_vcpkg_shallow
 	OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+)
 
 	if(is_vcpkg_shallow STREQUAL "true")
 		message(STATUS "vcpkg is shallow. Unshallowing it now...")
@@ -88,8 +88,8 @@ if (MSVC)
 		if((CMAKE_LINKER MATCHES ".*lld-link.*") AND (CMAKE_AR MATCHES ".*llvm-lib.*"))
 			set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY STATIC_LIBRARY_OPTIONS /llvmlibthin)
 		endif()
-  	else()
-	  add_compile_options(/GT)
+	else()
+		add_compile_options(/GT)
 	endif()
 	# enable additional optimization flags for release builds
 	add_compile_options($<$<CONFIG:Release,RelWithDebInfo>:/Oi>) # enable intrinsic functions
@@ -97,8 +97,8 @@ if (MSVC)
 endif()
 
 if (APPLE)
-    enable_language(OBJC OBJCXX)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.4")
+	enable_language(OBJC OBJCXX)
+	set(CMAKE_OSX_DEPLOYMENT_TARGET "13.4")
 endif()
 
 if (UNIX AND NOT APPLE)
@@ -226,12 +226,12 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if (ENABLE_WXWIDGETS)
-	find_package(wxWidgets 3.3 REQUIRED COMPONENTS base core gl propgrid xrc)
+	find_package(wxWidgets 3.3 REQUIRED COMPONENTS aui base core gl propgrid xrc)
 endif()
 
 if (ENABLE_CUBEB)
 	if (NOT ENABLE_VCPKG)
-	    find_package(cubeb)
+		find_package(cubeb)
 	endif()
 	if (NOT cubeb_FOUND)
 		option(BUILD_TESTS "" OFF)

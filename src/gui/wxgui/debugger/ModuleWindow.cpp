@@ -2,6 +2,7 @@
 #include "wxgui/debugger/ModuleWindow.h"
 
 #include <sstream>
+#include <wx/event.h>
 
 #include "wxgui/debugger/DebuggerWindow2.h"
 #include "Cafe/HW/Espresso/Debugger/Debugger.h"
@@ -18,8 +19,8 @@ enum ItemColumns
 	ColumnSize,
 };
 
-ModuleWindow::ModuleWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size)
-	: wxFrame(&parent, wxID_ANY, _("Modules"), wxDefaultPosition, wxSize(420, 250), wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT)
+ModuleWindow::ModuleWindow(wxWindow& parent)
+	: wxPanel(&parent)
 {
 	wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -52,25 +53,17 @@ ModuleWindow::ModuleWindow(DebuggerWindow2& parent, const wxPoint& main_position
 
 	this->Centre(wxBOTH);
 
-	if (parent.GetConfig().data().pin_to_main)
-		OnMainMove(main_position, main_size);
-
 	m_modules->Bind(wxEVT_LEFT_DCLICK, &ModuleWindow::OnLeftDClick, this);
+	Bind(wxEVT_NOTIFY_MODULE_LOADED, &ModuleWindow::OnGameLoaded, this);
+	Bind(wxEVT_NOTIFY_GRAPHIC_PACKS_MODIFIED, &ModuleWindow::OnGameLoaded, this);
 
 	OnGameLoaded();
 }
 
-void ModuleWindow::OnMainMove(const wxPoint& main_position, const wxSize& main_size)
+void ModuleWindow::OnGameLoaded(wxCommandEvent& event)
 {
-	wxSize size(420, 250);
-	this->SetSize(size);
-
-	wxPoint position = main_position;
-	position.x -= 420;
-	position.y += main_size.y;
-	this->SetPosition(position);
+	OnGameLoaded();
 }
-
 
 void ModuleWindow::OnGameLoaded()
 {

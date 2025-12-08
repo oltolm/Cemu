@@ -16,6 +16,7 @@ class DumpWindow;
 class ModuleWindow;
 class SymbolWindow;
 class wxStaticText;
+class wxAuiToolBar;
 
 wxDECLARE_EVENT(wxEVT_UPDATE_VIEW, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_BREAKPOINT_HIT, wxCommandEvent);
@@ -69,16 +70,15 @@ static wxBitmap LoadThemedBitmapFromPNG(const uint8* data, size_t size, const wx
 	return wxBitmap(img);
 }
 
-class DebuggerWindow2 : public wxFrame, public DebuggerCallbacks
+class DebuggerWindow2 : public wxPanel
 {
 public:
 	void CreateToolBar();
 	void LoadModuleStorage(const RPLModule* module);
 	void SaveModuleStorage(const RPLModule* module, bool delete_breakpoints);
-	DebuggerWindow2(wxFrame& parent, const wxRect& display_size);
+	DebuggerWindow2(wxWindow& parent);
 	~DebuggerWindow2();
 
-	void OnParentMove(const wxPoint& position, const wxSize& size);
 	void OnGameLoaded();
 
 	XMLDebuggerConfig& GetConfig();
@@ -92,10 +92,8 @@ private:
 	void OnToolClicked(wxCommandEvent& event);
 	void OnBreakpointChange(wxCommandEvent& event);
 	void OnOptionsInput(wxCommandEvent& event);
-	void OnWindowMenu(wxCommandEvent& event);
 	void OnUpdateView(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
-	void OnShow(wxShowEvent& event);
 	void OnClose(wxCloseEvent& event);
 	void OnMoveIP(wxCommandEvent& event);
 	void OnNotifyModuleLoaded(wxCommandEvent& event);
@@ -107,29 +105,15 @@ private:
 	void CreateMenuBar();
 	void UpdateModuleLabel(uint32 address = 0);
 
-	void UpdateViewThreadsafe() override;
-	void NotifyDebugBreakpointHit() override;
-	void NotifyRun() override;
-	void MoveIP() override;
-	void NotifyModuleLoaded(void* module) override;
-	void NotifyGraphicPacksModified() override;
-	void NotifyModuleUnloaded(void* module) override;
-
 	XMLDebuggerConfig m_config;
 	std::vector<std::unique_ptr<XMLDebuggerModuleConfig>> m_modules_storage;
 
 	wxPoint m_main_position;
 	wxSize m_main_size;
-	
-	RegisterWindow* m_register_window;
-	DumpWindow* m_dump_window;
-	BreakpointWindow* m_breakpoint_window;
-	ModuleWindow* m_module_window;
-	SymbolWindow* m_symbol_window;
 
 	DisasmCtrl* m_disasm_ctrl;
 
-	wxToolBar* m_toolbar;
+	wxAuiToolBar* m_toolbar;
 	wxBitmap m_run, m_pause;
 
 	uint32 m_module_address;

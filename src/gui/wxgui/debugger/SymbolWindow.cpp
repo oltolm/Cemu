@@ -11,8 +11,8 @@ enum ItemColumns
 	ColumnModule,
 };
 
-SymbolWindow::SymbolWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size)
-	: wxFrame(&parent, wxID_ANY, _("Symbols"), wxDefaultPosition, wxSize(600, 250), wxSYSTEM_MENU | wxCAPTION | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT)
+SymbolWindow::SymbolWindow(wxWindow& parent)
+	: wxPanel(&parent)
 {
 	wxBoxSizer* main_sizer = new wxBoxSizer(wxVERTICAL);
 	m_symbol_ctrl = new SymbolListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
@@ -26,24 +26,17 @@ SymbolWindow::SymbolWindow(DebuggerWindow2& parent, const wxPoint& main_position
 	this->wxWindowBase::Layout();
 
 	this->Centre(wxHORIZONTAL);
-
-	if (parent.GetConfig().data().pin_to_main)
-		OnMainMove(main_position, main_size);
-}
-
-void SymbolWindow::OnMainMove(const wxPoint& main_position, const wxSize& main_size)
-{
-	wxSize size(420, 250);
-	this->SetSize(size);
-
-	wxPoint position = main_position;
-	position.x -= 420;
-	this->SetPosition(position);
+	Bind(wxEVT_NOTIFY_MODULE_LOADED, &SymbolWindow::OnGameLoaded, this);
 }
 
 void SymbolWindow::OnGameLoaded()
 {
 	m_symbol_ctrl->OnGameLoaded();
+}
+
+void SymbolWindow::OnGameLoaded(wxCommandEvent& event)
+{
+	OnGameLoaded();
 }
 
 void SymbolWindow::OnFilterChanged(wxCommandEvent& event)

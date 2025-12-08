@@ -4,6 +4,8 @@
 #include "wxHelper.h"
 
 #include <filesystem>
+#include <wx/aui/auibar.h>
+#include <wx/panel.h>
 
 #include "config/ActiveSettings.h"
 #include "Cafe/OS/RPL/rpl_structs.h"
@@ -60,8 +62,7 @@ wxDEFINE_EVENT(wxEVT_NOTIFY_MODULE_LOADED, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_NOTIFY_MODULE_UNLOADED, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_NOTIFY_GRAPHIC_PACKS_MODIFIED, wxCommandEvent);
 
-wxBEGIN_EVENT_TABLE(DebuggerWindow2, wxFrame)
-	EVT_SHOW(DebuggerWindow2::OnShow)
+wxBEGIN_EVENT_TABLE(DebuggerWindow2, wxPanel)
 	EVT_CLOSE(DebuggerWindow2::OnClose)
 	EVT_COMMAND(wxID_ANY, wxEVT_UPDATE_VIEW, DebuggerWindow2::OnUpdateView)
 	EVT_COMMAND(wxID_ANY, wxEVT_BREAKPOINT_CHANGE, DebuggerWindow2::OnBreakpointChange)
@@ -75,8 +76,6 @@ wxBEGIN_EVENT_TABLE(DebuggerWindow2, wxFrame)
 	EVT_COMMAND(wxID_ANY, wxEVT_DISASMCTRL_NOTIFY_GOTO_ADDRESS, DebuggerWindow2::OnDisasmCtrlGotoAddress)
 	// file menu
 	EVT_MENU(MENU_ID_FILE_EXIT, DebuggerWindow2::OnExit)
-	// window
-	EVT_MENU_RANGE(MENU_ID_WINDOW_REGISTERS, MENU_ID_WINDOW_MODULE, DebuggerWindow2::OnWindowMenu)
 wxEND_EVENT_TABLE()
 
 
@@ -228,7 +227,7 @@ void DebuggerModuleStorage::Save(XMLConfigParser& parser)
 
 void DebuggerWindow2::CreateToolBar() 
 {
-	m_toolbar = wxFrame::CreateToolBar(wxTB_HORIZONTAL, wxID_ANY);
+	m_toolbar = new wxAuiToolBar(this);
 	m_toolbar->SetToolBitmapSize(wxSize(16, 16));
 
 	wxBitmap goto_bitmap = wxHelper::LoadThemedBitmapFromPNG(DEBUGGER_GOTO_png, sizeof(DEBUGGER_GOTO_png), wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
@@ -281,12 +280,10 @@ void DebuggerWindow2::LoadModuleStorage(const RPLModule* module)
 	}
 }
 
-DebuggerWindow2::DebuggerWindow2(wxFrame& parent, const wxRect& display_size)
-	: wxFrame(&parent, wxID_ANY, _("PPC Debugger"), wxDefaultPosition, wxSize(1280, 300), wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxSYSTEM_MENU | wxCAPTION | wxCLOSE_BOX | wxCLIP_CHILDREN | wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT),
-		m_module_address(0)
+DebuggerWindow2::DebuggerWindow2(wxWindow& parent)
+	: wxPanel(&parent),
+	  m_module_address(0)
 {
-	g_debuggerDispatcher.SetDebuggerCallbacks(this);
-
 	const auto file = ActiveSettings::GetConfigPath("debugger/config.xml");
 	m_config.SetFilename(file.generic_wstring());
 	m_config.Load();
@@ -296,9 +293,6 @@ DebuggerWindow2::DebuggerWindow2(wxFrame& parent, const wxRect& display_size)
 
 	m_main_position = parent.GetPosition();
 	m_main_size = parent.GetSize();
-
-	auto y = std::max<uint32>(300, (display_size.GetHeight() - 500 - 300) * 0.8);
-	this->SetSize(1280, y);
 
 	CreateMenuBar();
 	CreateToolBar();
@@ -334,17 +328,6 @@ DebuggerWindow2::DebuggerWindow2(wxFrame& parent, const wxRect& display_size)
 	this->SetSizer(main_sizer);
 	this->wxWindowBase::Layout();
 
-	m_register_window = new RegisterWindow(*this, m_main_position, m_main_size);
-	m_dump_window = new DumpWindow(*this, m_main_position, m_main_size);
-	m_breakpoint_window = new BreakpointWindow(*this, m_main_position, m_main_size);
-	m_module_window = new ModuleWindow(*this, m_main_position, m_main_size);
-	m_symbol_window = new SymbolWindow(*this, m_main_position, m_main_size);
-
-	const bool value = m_config.data().pin_to_main;
-	m_config.data().pin_to_main = true;
-	OnParentMove(m_main_position, m_main_size);
-	m_config.data().pin_to_main = value;
-
 	g_debugger_window = this;
 }
 
@@ -365,21 +348,6 @@ DebuggerWindow2::~DebuggerWindow2()
 		if (module)
 			SaveModuleStorage(module, false);
 	}
-
-	if (m_register_window && m_register_window->IsShown())
-		m_register_window->Close(true);
-
-	if (m_dump_window && m_dump_window->IsShown())
-		m_dump_window->Close(true);
-
-	if (m_breakpoint_window && m_breakpoint_window->IsShown())
-		m_breakpoint_window->Close(true);
-
-	if (m_module_window && m_module_window->IsShown())
-		m_module_window->Close(true);
-
-	if (m_symbol_window && m_symbol_window->IsShown())
-		m_symbol_window->Close(true);
 
 	m_config.Save();
 }
@@ -407,34 +375,10 @@ void DebuggerWindow2::OnDisasmCtrlGotoAddress(wxCommandEvent& event)
 	UpdateModuleLabel(address);
 }
 
-void DebuggerWindow2::OnParentMove(const wxPoint& main_position, const wxSize& main_size)
-{
-	m_main_position = main_position;
-	m_main_size = main_size;
-
-	if (!m_config.data().pin_to_main)
-		return;
-
-	wxSize size(m_main_size.x, GetSize().GetHeight());
-	SetSize(size);
-
-	wxPoint position = m_main_position;
-	position.y -= size.y;
-	SetPosition(position);
-
-	m_register_window->OnMainMove(main_position, main_size);
-	m_dump_window->OnMainMove(main_position, main_size);
-	m_breakpoint_window->OnMainMove(main_position, main_size);
-	m_module_window->OnMainMove(main_position, main_size);
-	m_symbol_window->OnMainMove(main_position, main_size);
-}
-
 void DebuggerWindow2::OnNotifyModuleLoaded(wxCommandEvent& event)
 {
 	RPLModule* module = (RPLModule*)event.GetClientData();
 	LoadModuleStorage(module);
-	m_module_window->OnGameLoaded();
-	m_symbol_window->OnGameLoaded();
 	m_disasm_ctrl->Init();
 }
 
@@ -442,26 +386,17 @@ void DebuggerWindow2::OnNotifyModuleUnloaded(wxCommandEvent& event)
 {
 	RPLModule* module = (RPLModule*)event.GetClientData(); // todo - the RPL module is already unloaded at this point. Find a better way to handle this
 	SaveModuleStorage(module, true);
-	m_module_window->OnGameLoaded();
-	m_symbol_window->OnGameLoaded();
 	m_disasm_ctrl->Init();
 }
 
 void DebuggerWindow2::OnNotifyGraphicPacksModified(wxCommandEvent& event)
 {
-	m_module_window->OnGameLoaded();
-	m_symbol_window->OnGameLoaded();
 	m_disasm_ctrl->Init();
 }
 
 void DebuggerWindow2::OnGameLoaded()
 {
 	m_disasm_ctrl->Init();
-
-	m_dump_window->OnGameLoaded();
-	m_module_window->OnGameLoaded();
-	m_breakpoint_window->OnGameLoaded();
-	m_symbol_window->OnGameLoaded();
 
 	RPLModule* current_rpl_module = RPLLoader_FindModuleByCodeAddr(MEMORY_CODEAREA_ADDR);
 	if(current_rpl_module)
@@ -477,24 +412,7 @@ XMLDebuggerConfig& DebuggerWindow2::GetConfig()
 
 bool DebuggerWindow2::Show(bool show)
 {
-	const bool result = wxFrame::Show(show);
-
-	if (show)
-	{
-		m_register_window->Show(m_config.data().show_register);
-		m_dump_window->Show(m_config.data().show_dump);
-		m_breakpoint_window->Show(m_config.data().show_breakpoints);
-		m_module_window->Show(m_config.data().show_modules);
-		m_symbol_window->Show(m_config.data().show_symbols);
-	}
-	else
-	{
-		m_register_window->Show(false);
-		m_dump_window->Show(false);
-		m_breakpoint_window->Show(false);
-		m_module_window->Show(false);
-		m_symbol_window->Show(false);
-	}
+	const bool result = wxPanel::Show(show);
 
 	return result;
 }
@@ -511,7 +429,7 @@ void DebuggerWindow2::OnBreakpointHit(wxCommandEvent& event)
 	UpdateModuleLabel(ip);
 
 	m_toolbar->SetToolShortHelp(TOOL_ID_PAUSE, _("Run (F5)"));
-	m_toolbar->SetToolNormalBitmap(TOOL_ID_PAUSE, m_run);
+	m_toolbar->SetToolBitmap(TOOL_ID_PAUSE, m_run);
 
 	m_toolbar->EnableTool(TOOL_ID_STEP_INTO, true);
 	m_toolbar->EnableTool(TOOL_ID_STEP_OVER, true);
@@ -522,7 +440,7 @@ void DebuggerWindow2::OnBreakpointHit(wxCommandEvent& event)
 void DebuggerWindow2::OnRunProgram(wxCommandEvent& event)
 {
 	m_toolbar->SetToolShortHelp(TOOL_ID_PAUSE, _("Break (F5)"));
-	m_toolbar->SetToolNormalBitmap(TOOL_ID_PAUSE, m_pause);
+	m_toolbar->SetToolBitmap(TOOL_ID_PAUSE, m_pause);
 
 	m_toolbar->EnableTool(TOOL_ID_STEP_INTO, false);
 	m_toolbar->EnableTool(TOOL_ID_STEP_OVER, false);
@@ -554,7 +472,6 @@ void DebuggerWindow2::OnToolClicked(wxCommandEvent& event)
 
 void DebuggerWindow2::OnBreakpointChange(wxCommandEvent& event)
 {
-	m_breakpoint_window->OnUpdateView();
 	m_disasm_ctrl->RefreshControl();
 	UpdateModuleLabel();
 }
@@ -563,15 +480,6 @@ void DebuggerWindow2::OnOptionsInput(wxCommandEvent& event)
 {
 	switch (event.GetId())
 	{
-	case MENU_ID_OPTIONS_PIN_TO_MAINWINDOW:
-	{
-		const bool value = !m_config.data().pin_to_main;
-		m_config.data().pin_to_main = value;
-		if (value)
-			OnParentMove(m_main_position, m_main_size);
-
-		break;
-	}
 	case MENU_ID_OPTIONS_BREAK_ON_START:
 	{
 		const bool value = !m_config.data().break_on_start;
@@ -606,73 +514,15 @@ void DebuggerWindow2::OnOptionsInput(wxCommandEvent& event)
 	m_config.Save();
 }
 
-void DebuggerWindow2::OnWindowMenu(wxCommandEvent& event)
-{
-	switch (event.GetId())
-	{
-	case MENU_ID_WINDOW_REGISTERS:
-	{
-		const bool value = !m_config.data().show_register;
-		m_config.data().show_register = value;
-		m_register_window->Show(value);
-		break;
-	}
-	case MENU_ID_WINDOW_DUMP:
-	{
-		const bool value = !m_config.data().show_dump;
-		m_config.data().show_dump = value;
-		m_dump_window->Show(value);
-		break;
-	}
-	case MENU_ID_WINDOW_BREAKPOINTS:
-	{
-		const bool value = !m_config.data().show_breakpoints;
-		m_config.data().show_breakpoints = value;
-		m_breakpoint_window->Show(value);
-		break;
-	}
-	case MENU_ID_WINDOW_MODULE:
-	{
-		const bool value = !m_config.data().show_modules;
-		m_config.data().show_modules = value;
-		m_module_window->Show(value);
-		break;
-	}
-	case MENU_ID_WINDOW_SYMBOL:
-	{
-		const bool value = !m_config.data().show_symbols;
-		m_config.data().show_symbols = value;
-		m_symbol_window->Show(value);
-		break;
-	}
-	default:
-		return;
-	}
-
-	m_config.Save();
-}
-
 void DebuggerWindow2::OnUpdateView(wxCommandEvent& event)
 {
 	UpdateModuleLabel();
 	m_disasm_ctrl->OnUpdateView();
-	m_register_window->OnUpdateView();
-	m_breakpoint_window->OnUpdateView();
 }
 
 void DebuggerWindow2::OnExit(wxCommandEvent& event)
 {
 	this->Close();
-}
-
-void DebuggerWindow2::OnShow(wxShowEvent& event)
-{
-	m_register_window->Show();
-	m_dump_window->Show();
-	m_breakpoint_window->Show();
-	m_module_window->Show();
-	m_symbol_window->Show();
-	event.Skip();
 }
 
 void DebuggerWindow2::CreateMenuBar()
@@ -688,7 +538,6 @@ void DebuggerWindow2::CreateMenuBar()
 
 	// options
 	wxMenu* options_menu = new wxMenu;
-	options_menu->Append(MENU_ID_OPTIONS_PIN_TO_MAINWINDOW, _("&Pin to main window"), wxEmptyString, wxITEM_CHECK)->Check(m_config.data().pin_to_main);
 	options_menu->Append(MENU_ID_OPTIONS_BREAK_ON_START, _("Break on &entry point"), wxEmptyString, wxITEM_CHECK)->Check(m_config.data().break_on_start);
 	options_menu->Append(MENU_ID_OPTIONS_LOG_MEMORY_BREAKPOINTS, _("Log only memory breakpoints"), wxEmptyString, wxITEM_CHECK)->Check(m_config.data().log_memory_breakpoints);
 	options_menu->Append(MENU_ID_OPTIONS_SWITCH_CPU_MODE, _("Switch to &interpreter CPU mode"), wxEmptyString, wxITEM_CHECK);
@@ -704,10 +553,9 @@ void DebuggerWindow2::CreateMenuBar()
 	
 	menu_bar->Append(window_menu, _("&Window"));
 
-	SetMenuBar(menu_bar);
+	// SetMenuBar(menu_bar);
 
 	options_menu->Bind(wxEVT_MENU, &DebuggerWindow2::OnOptionsInput, this);
-	window_menu->Bind(wxEVT_MENU, &DebuggerWindow2::OnWindowMenu, this);
 }
 
 void DebuggerWindow2::UpdateModuleLabel(uint32 address)
@@ -726,48 +574,4 @@ void DebuggerWindow2::UpdateModuleLabel(uint32 address)
 		m_module_label->SetLabel(wxString::Format("> %s", "Cemu codecave"));
 		m_module_address = mmuRange_CODECAVE.getBase();
 	}
-}
-
-void DebuggerWindow2::UpdateViewThreadsafe()
-{
-	auto* evt = new wxCommandEvent(wxEVT_UPDATE_VIEW);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::NotifyDebugBreakpointHit()
-{
-	auto* evt = new wxCommandEvent(wxEVT_BREAKPOINT_HIT);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::NotifyRun()
-{
-	auto* evt = new wxCommandEvent(wxEVT_RUN);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::MoveIP()
-{
-	auto* evt = new wxCommandEvent(wxEVT_MOVE_IP);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::NotifyModuleLoaded(void* module)
-{
-	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_MODULE_LOADED);
-	evt->SetClientData(module);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::NotifyGraphicPacksModified()
-{
-	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_GRAPHIC_PACKS_MODIFIED);
-	wxQueueEvent(this, evt);
-}
-
-void DebuggerWindow2::NotifyModuleUnloaded(void* module)
-{
-	auto* evt = new wxCommandEvent(wxEVT_NOTIFY_MODULE_UNLOADED);
-	evt->SetClientData(module);
-	wxQueueEvent(this, evt);
 }

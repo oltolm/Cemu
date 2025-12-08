@@ -1,22 +1,22 @@
 #pragma once
 
-#include <wx/frame.h>
+#include <wx/panel.h>
 
-class DebuggerWindow2;
+class wxCommandEvent;
 class wxListEvent;
 class wxListView;
 
-class BreakpointWindow : public wxFrame
+class BreakpointWindow : public wxPanel
 {
-public:
-	BreakpointWindow(DebuggerWindow2& parent, const wxPoint& main_position, const wxSize& main_size);
+  public:
+	BreakpointWindow(wxWindow& parent);
 	virtual ~BreakpointWindow();
 
-	void OnMainMove(const wxPoint& position, const wxSize& main_size);
 	void OnUpdateView();
+	void OnUpdateView(wxCommandEvent& event);
 	void OnGameLoaded();
 
-private:
+  private:
 	void OnBreakpointToggled(wxListEvent& event);
 	void OnLeftDClick(wxMouseEvent& event);
 	void OnRightDown(wxMouseEvent& event);
