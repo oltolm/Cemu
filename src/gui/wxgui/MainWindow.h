@@ -3,7 +3,9 @@
 #include <wx/wx.h>
 #include <wx/dataview.h>
 #include <wx/infobar.h>
+#include <wx/aui/aui.h>
 
+#include "Cafe/HW/Espresso/Debugger/Debugger.h"
 #include "wxgui/PadViewFrame.h"
 #include "wxgui/MemorySearcherTool.h"
 
@@ -23,6 +25,11 @@ class TitleManager;
 class GraphicPacksWindow2;
 class EmulatedUSBDeviceFrame;
 class wxLaunchGameEvent;
+class RegisterWindow;
+class DumpWindow;
+class BreakpointWindow;
+class ModuleWindow;
+class SymbolWindow;
 
 wxDECLARE_EVENT(wxEVT_LAUNCH_GAME, wxLaunchGameEvent);
 wxDECLARE_EVENT(wxEVT_SET_WINDOW_TITLE, wxCommandEvent);
@@ -52,7 +59,7 @@ private:
 	INITIATED_BY m_initiatedBy;
 };
 
-class MainWindow : public wxFrame, public CafeSystem::SystemImplementation
+class MainWindow : public wxFrame, public CafeSystem::SystemImplementation, public DebuggerCallbacks
 {
 	friend class CemuApp;
 
@@ -78,7 +85,7 @@ public:
 	void TogglePadView();
 
 #if BOOST_OS_WINDOWS
-	WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) override;
+	// WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) override;
 #endif
 	void OpenSettings();
 
@@ -162,6 +169,14 @@ private:
 
 	wxRect GetDesktopRect();
 
+	void UpdateViewThreadsafe() override;
+	void NotifyDebugBreakpointHit() override;
+	void NotifyRun() override;
+	void MoveIP() override;
+	void NotifyModuleLoaded(void* module) override;
+	void NotifyGraphicPacksModified() override;
+	void NotifyModuleUnloaded(void* module) override;
+
 	MemorySearcherTool* m_toolWindow = nullptr;
 	TitleManager* m_title_manager = nullptr;
 	EmulatedUSBDeviceFrame* m_usb_devices = nullptr;
@@ -186,6 +201,7 @@ private:
 	wxMenuItem* m_gdbstub_toggle{};
 	DebuggerWindow2* m_debugger_window = nullptr;
 	LoggingWindow* m_logging_window = nullptr;
+	wxAuiManager* m_debugManager = nullptr;
 
 	std::future<bool> m_update_available;
 
@@ -238,7 +254,13 @@ private:
 	wxMenu* m_loggingSubmenu{};
 	wxMenuItem* m_asyncCompile{};
 
-wxDECLARE_EVENT_TABLE();
+	RegisterWindow* m_register_window;
+	DumpWindow* m_dump_window;
+	BreakpointWindow* m_breakpoint_window;
+	ModuleWindow* m_module_window;
+	SymbolWindow* m_symbol_window;
+
+	wxDECLARE_EVENT_TABLE();
 };
 
 extern MainWindow* g_mainFrame;
