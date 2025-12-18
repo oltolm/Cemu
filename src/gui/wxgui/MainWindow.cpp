@@ -403,7 +403,25 @@ MainWindow::MainWindow()
 	m_symbol_window = new SymbolWindow(*this);
 	m_debugger_window = new DebuggerWindow2(*this);
 
-	m_debugManager = new wxAuiManager(this, wxAUI_MGR_RECTANGLE_HINT);
+	// create panel for canvas
+	m_game_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxWANTS_CHARS);
+	auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+	// shouldn't be needed, but who knows
+	m_game_panel->Bind(wxEVT_KEY_UP, &MainWindow::OnKeyUp, this);
+	m_game_panel->Bind(wxEVT_CHAR, &MainWindow::OnChar, this);
+
+	m_game_panel->SetSizer(sizer);
+
+	m_debugManager = new wxAuiManager(this, wxAUI_MGR_DEFAULT);
+	m_debugManager->AddPane(m_game_panel, wxAuiPaneInfo()
+											  .Name("Game")
+											  .Caption("Game")
+											  .Show(true)
+											  .Resizable(true)
+											  .Dockable(true)
+											  .Floatable(true)
+											  .Float());
 	m_debugManager->AddPane(m_debugger_window, wxAuiPaneInfo()
 												   .Name("PPCDebugger")
 												   .Caption("PPC Debugger")
@@ -647,7 +665,7 @@ bool MainWindow::FileLoad(const fs::path launchPath, wxLaunchGameEvent::INITIATE
 
 	wxWindowUpdateLocker lock(this);
 
-    DestroyGameListAndStatusBar();
+    // DestroyGameListAndStatusBar();
 
 	m_game_launched = true;
 	m_loadMenuItem->Enable(false);
@@ -685,7 +703,7 @@ bool MainWindow::FileLoad(const fs::path launchPath, wxLaunchGameEvent::INITIATE
 
 	CreateCanvas();
 	CafeSystem::LaunchForegroundTitle();
-	RecreateMenu();
+	// RecreateMenu();
 	UpdateChildWindowTitleRunningState();
 
 	return true;
@@ -944,8 +962,8 @@ void MainWindow::OpenSettings()
 	if(config.check_update && !m_game_launched)
 		m_update_available = CemuUpdateWindow::IsUpdateAvailableAsync();
 
-	if (mlc_modified)
-		RecreateMenu();
+	// if (mlc_modified)
+	// RecreateMenu();
 
 	if (!config.fullscreen_menubar && IsFullScreen())
 		SetMenuVisible(false);
@@ -1509,7 +1527,7 @@ void MainWindow::OnGameListEndUpdate(wxCommandEvent& event)
 
 void MainWindow::OnAccountListRefresh(wxCommandEvent& event)
 {
-	RecreateMenu();
+	// RecreateMenu();
 }
 
 void MainWindow::OnRequestGameListRefresh(wxCommandEvent& event)
@@ -1658,19 +1676,8 @@ void MainWindow::AsyncSetTitle(std::string_view windowTitle)
 
 void MainWindow::CreateCanvas()
 {
-    // create panel for canvas
-    m_game_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxNO_BORDER | wxWANTS_CHARS);
-    auto* sizer = new wxBoxSizer(wxVERTICAL);
-
-    // shouldn't be needed, but who knows
-    m_game_panel->Bind(wxEVT_KEY_UP, &MainWindow::OnKeyUp, this);
-    m_game_panel->Bind(wxEVT_CHAR, &MainWindow::OnChar, this);
-
-    m_game_panel->SetSizer(sizer);
-    this->GetSizer()->Add(m_game_panel, 1, wxEXPAND);
-
-    // create canvas
-    if (ActiveSettings::GetGraphicsAPI() == kVulkan)
+	// create canvas
+	if (ActiveSettings::GetGraphicsAPI() == kVulkan)
 		m_render_canvas = new VulkanCanvas(m_game_panel, wxSize(1280, 720), true);
 	else if (ActiveSettings::GetGraphicsAPI() == kOpenGL)
 		m_render_canvas = GLCanvas_Create(m_game_panel, wxSize(1280, 720), true);
@@ -2482,13 +2489,13 @@ void MainWindow::UpdateChildWindowTitleRunningState()
 
 void MainWindow::RestoreSettingsAfterGameExited()
 {
-	RecreateMenu();
+	// RecreateMenu();
 }
 
 void MainWindow::UpdateSettingsAfterGameLaunch()
 {
 	m_update_available = {};
-	RecreateMenu();
+	// RecreateMenu();
 }
 
 void MainWindow::OnGraphicWindowClose(wxCloseEvent& event)
