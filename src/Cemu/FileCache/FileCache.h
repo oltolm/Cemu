@@ -2,6 +2,8 @@
 
 #include <mutex>
 
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
 class FileCache
 {
 public:
@@ -94,3 +96,4 @@ private:
 
 	std::recursive_mutex mutex;
 };
+#pragma pop_macro("DeleteFile")
