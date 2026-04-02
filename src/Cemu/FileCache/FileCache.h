@@ -43,7 +43,10 @@ public:
 
 	void AddFile(const FileName&& name, const uint8* fileData, sint32 fileSize);
 	void AddFileAsync(const FileName& name, const uint8* fileData, sint32 fileSize);
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
 	bool DeleteFile(const FileName&& name);
+#pragma pop_macro("DeleteFile")
 	bool GetFile(const FileName&& name, std::vector<uint8>& dataOut);
 	bool GetFileByIndex(sint32 index, uint64* name1, uint64* name2, std::vector<uint8>& dataOut);
 	bool HasFile(const FileName&& name);
