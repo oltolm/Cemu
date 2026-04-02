@@ -478,7 +478,10 @@ void LatteShaderCache_Load()
 		{
 			// something is wrong with the stored shader, remove entry from shader cache files
 			cemuLog_log(LogType::Force, "Shader cache entry {} invalid, deleting...", loadIndex);
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
 			s_shaderCacheGeneric->DeleteFile({name1, name2 });
+#pragma pop_macro("DeleteFile")
 		}
 		numLoadedShaders++;
 		loadIndex++;
