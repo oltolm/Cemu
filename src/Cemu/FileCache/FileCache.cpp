@@ -480,7 +480,10 @@ void FileCache::AddFile(const FileName&& name, const uint8* fileData, sint32 fil
 	this->_addFileInternal(name.name1, name.name2, fileData, fileSize, false);
 }
 
+#pragma push_macro("DeleteFile")
+#undef DeleteFile
 bool FileCache::DeleteFile(const FileName&& name)
+#pragma pop_macro("DeleteFile")
 {
 	if( name.name1 == FILECACHE_FILETABLE_NAME1 && name.name2 == FILECACHE_FILETABLE_NAME2 )
 		return false; // prevent filetable from being deleted
