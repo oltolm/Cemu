@@ -82,6 +82,8 @@ LatteTextureViewVk::~LatteTextureViewVk()
 		VulkanRenderer::GetInstance()->ReleaseDestructibleObject(m_smallCacheView0);
 	if (m_smallCacheView1)
 		VulkanRenderer::GetInstance()->ReleaseDestructibleObject(m_smallCacheView1);
+	if (m_attachmentView)
+		VulkanRenderer::GetInstance()->ReleaseDestructibleObject(m_attachmentView);
 
 	if (m_fallbackCache)
 	{
@@ -92,16 +94,19 @@ LatteTextureViewVk::~LatteTextureViewVk()
 	}
 }
 
-VKRObjectTextureView* LatteTextureViewVk::CreateView(uint32 gpuSamplerSwizzle)
+VKRObjectTextureView* LatteTextureViewVk::CreateView(uint32 gpuSamplerSwizzle, bool adjustTextureCompSel)
 {
 	uint32 compSelR = (gpuSamplerSwizzle >> 16) & 0x7;
 	uint32 compSelG = (gpuSamplerSwizzle >> 19) & 0x7;
 	uint32 compSelB = (gpuSamplerSwizzle >> 22) & 0x7;
 	uint32 compSelA = (gpuSamplerSwizzle >> 25) & 0x7;
-	compSelR = LatteTextureVk_AdjustTextureCompSel(format, compSelR);
-	compSelG = LatteTextureVk_AdjustTextureCompSel(format, compSelG);
-	compSelB = LatteTextureVk_AdjustTextureCompSel(format, compSelB);
-	compSelA = LatteTextureVk_AdjustTextureCompSel(format, compSelA);
+	if (adjustTextureCompSel)
+	{
+		compSelR = LatteTextureVk_AdjustTextureCompSel(format, compSelR);
+		compSelG = LatteTextureVk_AdjustTextureCompSel(format, compSelG);
+		compSelB = LatteTextureVk_AdjustTextureCompSel(format, compSelB);
+		compSelA = LatteTextureVk_AdjustTextureCompSel(format, compSelA);
+	}
 
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -150,9 +155,56 @@ VKRObjectTextureView* LatteTextureViewVk::CreateView(uint32 gpuSamplerSwizzle)
 	return new VKRObjectTextureView(GetBaseImage()->GetImageObj(), view);
 }
 
+VKRObjectTextureView* LatteTextureViewVk::CreateAttachmentView()
+{
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = GetBaseImage()->GetImageObj()->m_image;
+	viewInfo.viewType = GetImageViewTypeFromGX2Dim(dim);
+	viewInfo.format = m_format;
+	viewInfo.subresourceRange.aspectMask = GetBaseImage()->GetImageAspect();
+	if (viewInfo.subresourceRange.aspectMask & VK_IMAGE_ASPECT_DEPTH_BIT)
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT; // make sure stencil is never set, we only support sampling depth for now
+
+	// Framebuffer attachments must address a single mip level.
+	viewInfo.subresourceRange.baseMipLevel = firstMip;
+	viewInfo.subresourceRange.levelCount = 1;
+
+	if (viewInfo.viewType == VK_IMAGE_VIEW_TYPE_3D && baseTexture->Is3DTexture())
+	{
+		cemu_assert_debug(firstMip == 0);
+		cemu_assert_debug(this->numSlice == baseTexture->depth);
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+	}
+	else
+	{
+		viewInfo.subresourceRange.baseArrayLayer = firstSlice;
+		viewInfo.subresourceRange.layerCount = this->numSlice;
+	}
+
+	viewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+	viewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+	viewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+	viewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+
+	VkImageView view;
+	if (vkCreateImageView(m_device, &viewInfo, nullptr, &view) != VK_SUCCESS)
+		throw std::runtime_error("failed to create framebuffer attachment image view!");
+
+	return new VKRObjectTextureView(GetBaseImage()->GetImageObj(), view);
+}
+
 VKRObjectTextureView* LatteTextureViewVk::GetViewRGBA()
 { 
 	return GetSamplerView(0x06880000); // RGBA swizzle
+}
+
+VKRObjectTextureView* LatteTextureViewVk::GetAttachmentView()
+{
+	if (!m_attachmentView)
+		m_attachmentView = CreateAttachmentView();
+	return m_attachmentView;
 }
 
 VKRObjectTextureView* LatteTextureViewVk::GetSamplerView(uint32 gpuSamplerSwizzle)
@@ -172,7 +224,7 @@ VKRObjectTextureView* LatteTextureViewVk::GetSamplerView(uint32 gpuSamplerSwizzl
 			return it->second;
 	}
 	// not cached, create new view and store in cache
-	auto viewObj = CreateView(gpuSamplerSwizzle);
+	auto viewObj = CreateView(gpuSamplerSwizzle, true);
 	if (m_smallCacheSwizzle0 == CACHE_EMPTY_ENTRY)
 	{
 		m_smallCacheSwizzle0 = gpuSamplerSwizzle;
