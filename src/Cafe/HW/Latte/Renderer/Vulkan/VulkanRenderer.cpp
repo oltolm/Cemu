@@ -3675,14 +3675,19 @@ void VulkanRenderer::texture_copyImageSubData(LatteTexture* src, sint32 srcMip, 
 LatteTextureReadbackInfo* VulkanRenderer::texture_createReadback(LatteTextureView* textureView)
 {
 	auto* result = new LatteTextureReadbackInfoVk(m_logicalDevice, textureView);
+	const uint32 linearImageSize = result->GetImageSize();
+	if (linearImageSize == 0)
+	{
+		delete result;
+		return nullptr;
+	}
 
 	LatteTextureVk* vkTex = (LatteTextureVk*)textureView->baseTexture;
 
 	VkMemoryRequirements memRequirements;
 	vkGetImageMemoryRequirements(m_logicalDevice, vkTex->GetImageObj()->m_image, &memRequirements);
 
-	const uint32 linearImageSize = result->GetImageSize();
-	const uint32 uploadSize = (linearImageSize == 0) ? memRequirements.size : linearImageSize;
+	const uint32 uploadSize = linearImageSize;
 	const uint32 uploadAlignment = 256; // todo - use Vk optimalBufferCopyOffsetAlignment
 	m_textureReadbackBufferWriteIndex = (m_textureReadbackBufferWriteIndex + uploadAlignment - 1) & ~(uploadAlignment - 1);
 
