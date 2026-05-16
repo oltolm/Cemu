@@ -815,6 +815,36 @@ void LatteTextureLoader_writeReadbackTextureToMemory(LatteTextureDefinition* tex
 			}
 		}
 	}
+	else if (hwFormat == Latte::E_HWFMT::HWFMT_32_32)
+	{
+		for (sint32 y = 0; y < textureLoader.height; y++)
+		{
+			uint8* pixelInput = linearPixelData + y * sourceRowPitch;
+			for (sint32 x = 0; x < textureLoader.width; x++)
+			{
+				uint8* outputData = LatteTextureLoader_GetInput(&textureLoader, x, y);
+				*(uint32*)(outputData + 0) = *(uint32*)(pixelInput + 0);
+				*(uint32*)(outputData + 4) = *(uint32*)(pixelInput + 4);
+				pixelInput += 8;
+			}
+		}
+	}
+	else if (hwFormat == Latte::E_HWFMT::HWFMT_32_32_32_32)
+	{
+		for (sint32 y = 0; y < textureLoader.height; y++)
+		{
+			uint8* pixelInput = linearPixelData + y * sourceRowPitch;
+			for (sint32 x = 0; x < textureLoader.width; x++)
+			{
+				uint8* outputData = LatteTextureLoader_GetInput(&textureLoader, x, y);
+				*(uint32*)(outputData + 0) = *(uint32*)(pixelInput + 0);
+				*(uint32*)(outputData + 4) = *(uint32*)(pixelInput + 4);
+				*(uint32*)(outputData + 8) = *(uint32*)(pixelInput + 8);
+				*(uint32*)(outputData + 12) = *(uint32*)(pixelInput + 12);
+				pixelInput += 16;
+			}
+		}
+	}
 	else
 	{
 		cemuLog_logDebug(LogType::Force, "Texture readback unsupported format {:04x} for tileMode 0x{:02x}", (uint32)textureData->format, textureData->tileMode);
