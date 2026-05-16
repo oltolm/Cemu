@@ -750,12 +750,12 @@ void LatteTextureLoader_writeReadbackTextureToMemory(LatteTextureDefinition* tex
 		{
 			optimizedLinearReadbackWriteLoop<uint64>(&textureLoader, linearPixelData);
 		}
-		else if (textureData->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_FLOAT)
+		else if (textureData->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_UINT ||
+				 textureData->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_FLOAT)
 		{
 			for (sint32 y = 0; y < textureLoader.height; y += textureLoader.stepY)
 			{
-				sint32 yc = y;
-				sint32 pixelOffset = (0 + yc * pitch) * 16;
+				sint32 pixelOffset = (0 + y * pitch) * 16;
 				for (sint32 x = 0; x < textureLoader.width; x += textureLoader.stepX)
 				{
 					uint8* blockData = LatteTextureLoader_getInputLinearOptimized(&textureLoader, x, y);
@@ -797,6 +797,10 @@ void LatteTextureLoader_writeReadbackTextureToMemory(LatteTextureDefinition* tex
 		else if (textureData->format == Latte::E_GX2SURFFMT::R8_G8_UNORM)
 		{
 			optimizedLinearReadbackWriteLoop<uint16>(&textureLoader, linearPixelData);
+		}
+		else if (textureData->format == Latte::E_GX2SURFFMT::R32_G32_UINT)
+		{
+			optimizedLinearReadbackWriteLoop<uint64>(&textureLoader, linearPixelData);
 		}
 		else if (textureData->format == Latte::E_GX2SURFFMT::R16_G16_B16_A16_UNORM)
 		{
@@ -841,6 +845,36 @@ void LatteTextureLoader_writeReadbackTextureToMemory(LatteTextureDefinition* tex
 				uint8* outputData = LatteTextureLoader_GetInput(&textureLoader, x, y);
 				*(uint32*)(outputData + 0) = *(uint32*)pixelInput;
 				pixelInput += 4;
+			}
+		}
+	}
+	else if (hwFormat == Latte::E_HWSURFFMT::HWFMT_32_32)
+	{
+		for (sint32 y = 0; y < textureLoader.height; y++)
+		{
+			uint8* pixelInput = linearPixelData + (y * textureLoader.width) * 8;
+			for (sint32 x = 0; x < textureLoader.width; x++)
+			{
+				uint8* outputData = LatteTextureLoader_GetInput(&textureLoader, x, y);
+				*(uint32*)(outputData + 0) = *(uint32*)(pixelInput + 0);
+				*(uint32*)(outputData + 4) = *(uint32*)(pixelInput + 4);
+				pixelInput += 8;
+			}
+		}
+	}
+	else if (hwFormat == Latte::E_HWSURFFMT::HWFMT_32_32_32_32)
+	{
+		for (sint32 y = 0; y < textureLoader.height; y++)
+		{
+			uint8* pixelInput = linearPixelData + (y * textureLoader.width) * 16;
+			for (sint32 x = 0; x < textureLoader.width; x++)
+			{
+				uint8* outputData = LatteTextureLoader_GetInput(&textureLoader, x, y);
+				*(uint32*)(outputData + 0) = *(uint32*)(pixelInput + 0);
+				*(uint32*)(outputData + 4) = *(uint32*)(pixelInput + 4);
+				*(uint32*)(outputData + 8) = *(uint32*)(pixelInput + 8);
+				*(uint32*)(outputData + 12) = *(uint32*)(pixelInput + 12);
+				pixelInput += 16;
 			}
 		}
 	}
