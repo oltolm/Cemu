@@ -37,6 +37,11 @@ uint32 LatteTextureReadbackInfoVk::GetImageSize(LatteTextureView* textureView)
 		cemu_assert(textureFormat == VK_FORMAT_R32G32B32A32_SFLOAT);
 		return baseTexture->width * baseTexture->height * 16;
 	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_UINT)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R32G32B32A32_UINT);
+		return baseTexture->width * baseTexture->height * 16;
+	}
 	else if (textureView->format == Latte::E_GX2SURFFMT::R32_FLOAT)
 	{
 		cemu_assert(textureFormat == VK_FORMAT_R32_SFLOAT || textureFormat == VK_FORMAT_D32_SFLOAT);
@@ -67,6 +72,11 @@ uint32 LatteTextureReadbackInfoVk::GetImageSize(LatteTextureView* textureView)
 	{
 		cemu_assert(textureFormat == VK_FORMAT_R8G8_UNORM);
 		return baseTexture->width * baseTexture->height * 2;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R32_G32_UINT)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R32G32_UINT);
+		return baseTexture->width * baseTexture->height * 8;
 	}
 	else if (textureView->format == Latte::E_GX2SURFFMT::R16_G16_B16_A16_UNORM)
 	{
