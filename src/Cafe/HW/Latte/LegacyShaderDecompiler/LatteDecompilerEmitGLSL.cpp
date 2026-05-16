@@ -112,6 +112,25 @@ char* _getTempString()
 	return str;
 }
 
+static const char* _getPSInputDefaultValueExpr(uint8 defaultValue)
+{
+	switch (defaultValue)
+	{
+	case 0:
+		return "vec4(0.0)";
+	case 1:
+		return "vec4(0.0, 0.0, 0.0, 1.0)";
+	case 2:
+		return "vec4(1.0, 1.0, 1.0, 0.0)";
+	case 3:
+		return "vec4(1.0)";
+	default:
+		break;
+	}
+	cemu_assert_debug(false);
+	return "vec4(0.0)";
+}
+
 static char* _getActiveMaskVarName(LatteDecompilerShaderContext* shaderContext, sint32 index)
 {
 	char* varName = _getTempString();
@@ -4020,6 +4039,38 @@ void LatteDecompiler_emitGLSLShader(LatteDecompilerShaderContext* shaderContext,
 		src->addFmt("float PV0fx = 0.0, PV0fy = 0.0, PV0fz = 0.0, PV0fw = 0.0, PV1fx = 0.0, PV1fy = 0.0, PV1fz = 0.0, PV1fw = 0.0;" _CRLF);
 		src->addFmt("float PS0f = 0.0, PS1f = 0.0;" _CRLF);
 		src->addFmt("vec4 tempf = vec4(0.0);" _CRLF);
+	}
+	if (shader->shaderType == LatteConst::ShaderType::Vertex && !shaderContext->options->usesGeometryShader)
+	{
+		LatteShaderPSInputTable* psInputTable = LatteSHRC_GetPSInputTable();
+		auto parameterMask = shaderContext->shader->outputParameterMask;
+		bool psInputsWritten[GPU7_PS_MAX_INPUTS] = {false};
+		for (uint32 i = 0; i < 32; i++)
+		{
+			if ((parameterMask & (1 << i)) == 0)
+				continue;
+			uint32 vsSemanticId = _getVertexShaderOutParamSemanticId(shaderContext->contextRegisters, i);
+			if (vsSemanticId > LATTE_ANALYZER_IMPORT_INDEX_PARAM_MAX)
+				continue;
+			for (sint32 f = 0; f < psInputTable->count; f++)
+			{
+				if (psInputTable->import[f].semanticId == vsSemanticId)
+				{
+					psInputsWritten[f] = true;
+					break;
+				}
+			}
+		}
+		for (uint32 i = 0; i < psInputTable->count; i++)
+		{
+			if (psInputsWritten[i])
+				continue;
+			if ((shaderContext->analyzer.gprUseMask[i / 8] & (1 << (i % 8))) == 0 && !shaderContext->analyzer.usesRelativeGPRRead)
+				continue;
+			if (psInputTable->import[i].semanticId > LATTE_ANALYZER_IMPORT_INDEX_PARAM_MAX)
+				continue;
+			src->addFmt("passParameterSemDummy{} = {};" _CRLF, i, _getPSInputDefaultValueExpr(psInputTable->import[i].defaultValue));
+		}
 	}
 	if (shaderContext->analyzer.hasGradientLookup)
 	{

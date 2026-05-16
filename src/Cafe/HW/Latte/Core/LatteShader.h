@@ -27,6 +27,7 @@ struct LatteShaderPSInputTable
 	struct psImport_t
 	{
 		uint32 semanticId;
+		uint8 defaultValue;
 		bool isFlat;
 		bool isNoPerspective;
 	};
