@@ -256,7 +256,7 @@ namespace LatteDecompiler
 		// OpenGL/Vulkan ifdefs
 		src->add("#ifdef VULKAN" _CRLF);
 		// Vulkan defines
-		src->add("#define ATTR_LAYOUT(__vkSet, __location) layout(set = __vkSet, location = __location)" _CRLF);
+		src->add("#define ATTR_LAYOUT(__vkSet, __location) layout(location = __location)" _CRLF);
 		src->add("#define UNIFORM_BUFFER_LAYOUT(__glLocation, __vkSet, __vkLocation) layout(set = __vkSet, binding = __vkLocation, std140)" _CRLF);
 		src->add("#define TEXTURE_LAYOUT(__glLocation, __vkSet, __vkLocation) layout(set = __vkSet, binding = __vkLocation)" _CRLF);
 		if (decompilerContext->shaderType == LatteConst::ShaderType::Vertex || decompilerContext->shaderType == LatteConst::ShaderType::Geometry)
