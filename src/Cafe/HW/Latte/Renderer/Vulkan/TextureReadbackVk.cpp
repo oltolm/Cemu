@@ -15,8 +15,35 @@ LatteTextureReadbackInfoVk::~LatteTextureReadbackInfoVk()
 
 uint32 LatteTextureReadbackInfoVk::GetImageSize(LatteTextureView* textureView)
 {
-	auto* baseTexture = (LatteTextureVk*)textureView->baseTexture;
-	if (baseTexture->m_isAlternateFormat || baseTexture->IsCompressedFormat())
+	const auto* baseTexture = (LatteTextureVk*)textureView->baseTexture;
+	// handle format
+	const auto textureFormat = baseTexture->GetFormat();
+	if (textureView->format == Latte::E_GX2SURFFMT::R8_G8_B8_A8_UNORM)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R8G8B8A8_UNORM);
+		return baseTexture->width * baseTexture->height * 4;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R8_UNORM )
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R8_UNORM);
+		return baseTexture->width * baseTexture->height * 1;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R8_G8_B8_A8_SRGB)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R8G8B8A8_SRGB);
+		return baseTexture->width * baseTexture->height * 4;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_FLOAT)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R32G32B32A32_SFLOAT);
+		return baseTexture->width * baseTexture->height * 16;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R32_G32_B32_A32_UINT)
+	{
+		cemu_assert(textureFormat == VK_FORMAT_R32G32B32A32_UINT);
+		return baseTexture->width * baseTexture->height * 16;
+	}
+	else if (textureView->format == Latte::E_GX2SURFFMT::R32_FLOAT)
 	{
 		cemuLog_logDebug(LogType::Force, "Vulkan does not support readback of texture format 0x{:x}", (uint32)baseTexture->format);
 		return 0;
