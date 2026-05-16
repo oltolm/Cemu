@@ -379,6 +379,7 @@ namespace LatteDecompiler
 		auto* src = shaderContext->shaderSource;
 		LatteShaderPSInputTable* psInputTable = LatteSHRC_GetPSInputTable();
 		auto parameterMask = shaderContext->shader->outputParameterMask;
+		bool psInputsWritten[GPU7_PS_MAX_INPUTS] = {false};
 		for (uint32 i = 0; i < 32; i++)
 		{
 			if ((parameterMask&(1 << i)) == 0)
@@ -399,6 +400,8 @@ namespace LatteDecompiler
 			if (psInputIndex == -1)
 				continue; // no ps input
 
+			psInputsWritten[psInputIndex] = true;
+
 			src->addFmt("layout(location = {}) ", psInputIndex);
 			if (psInputTable->import[psInputIndex].isFlat)
 				src->add("flat ");
@@ -406,6 +409,21 @@ namespace LatteDecompiler
 				src->add("noperspective ");
 			src->add("out");
 			src->addFmt(" vec4 passParameterSem{};" _CRLF, psInputTable->import[psInputIndex].semanticId);
+		}
+
+		for (uint32 i = 0; i < psInputTable->count; i++)
+		{
+			if (psInputsWritten[i])
+				continue;
+			if (psInputTable->import[i].semanticId > LATTE_ANALYZER_IMPORT_INDEX_PARAM_MAX)
+				continue;
+			src->addFmt("layout(location = {}) ", i);
+			if (psInputTable->import[i].isFlat)
+				src->add("flat ");
+			if (psInputTable->import[i].isNoPerspective)
+				src->add("noperspective ");
+			src->add("out");
+			src->addFmt(" vec4 passParameterSemDummy{};" _CRLF, i);
 		}
 	}
 
@@ -415,6 +433,8 @@ namespace LatteDecompiler
 		LatteShaderPSInputTable* psInputTable = LatteSHRC_GetPSInputTable();
 		for (sint32 i = 0; i < psInputTable->count; i++)
 		{
+			if ((shaderContext->analyzer.gprUseMask[i / 8] & (1 << (i % 8))) == 0 && !shaderContext->analyzer.usesRelativeGPRRead)
+				continue;
 			if (psInputTable->import[i].semanticId > LATTE_ANALYZER_IMPORT_INDEX_PARAM_MAX)
 				continue;
 			src->addFmt("layout(location = {}) ", i);

@@ -290,6 +290,7 @@ void LatteShader_CreatePSInputTable(LatteShaderPSInputTable* psInputTable, uint3
 		if (f == spi0_positionAddr)
 		{
 			psInputTable->import[f].semanticId = LATTE_ANALYZER_IMPORT_INDEX_SPIPOSITION;
+			psInputTable->import[f].defaultValue = defaultValue;
 			psInputTable->import[f].isFlat = false;
 			psInputTable->import[f].isNoPerspective = false;
 			key += (uint64)0x33;
@@ -305,6 +306,7 @@ void LatteShader_CreatePSInputTable(LatteShaderPSInputTable* psInputTable, uint3
 #endif
 
 			psInputTable->import[f].semanticId = psSemanticId;
+			psInputTable->import[f].defaultValue = defaultValue;
 			psInputTable->import[f].isFlat = (psInputControl&(1 << 10)) != 0;
 			psInputTable->import[f].isNoPerspective = (psInputControl&(1 << 12)) != 0;
 		}
