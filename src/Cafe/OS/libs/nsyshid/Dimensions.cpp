@@ -779,8 +779,6 @@ namespace nsyshid
 		std::array<uint8, 8> value = Decrypt(buf, std::nullopt);
 		// Seed is the first 4 bytes (little endian) of the decrypted payload
 		uint32 seed = (uint32&)value[0];
-		// Confirmation is the second 4 bytes (big endian) of the decrypted payload
-		uint32 conf = (uint32be&)value[4];
 		// Initialize rng using the seed from decrypted payload
 		InitializeRNG(seed);
 		// Encrypt 8 bytes, first 4 bytes is the decrypted confirmation from payload, 2nd 4 bytes are blank
@@ -799,8 +797,6 @@ namespace nsyshid
 	{
 		// Decrypt payload into an 8 byte array
 		std::array<uint8, 8> value = Decrypt(buf, std::nullopt);
-		// Confirmation is the first 4 bytes of the decrypted payload
-		uint32 conf = (uint32be&)value[0];
 		// Generate next random number based on RNG
 		uint32 nextRandom = GetNext();
 		// Encrypt an 8 byte array, first 4 bytes are the next random number (little endian)
@@ -969,7 +965,14 @@ namespace nsyshid
 
 		std::array<uint8, 4> randomized = DimensionsRandomize(toScramble, count);
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-user-defined"
+#endif
 		return (uint32be&)randomized[0];
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 	}
 
 	std::array<uint8, 4> DimensionsUSB::PWDGenerate(const std::array<uint8, 0x2D * 0x04>& buf)
@@ -1083,7 +1086,6 @@ namespace nsyshid
 		// Decrypt payload to 8 byte array, byte 1 is the index, 4-7 are the confirmation
 		std::array<uint8, 8> value = Decrypt(buf, std::nullopt);
 		uint8 index = value[0];
-		uint32 conf = (uint32be&)value[4];
 		// Response is the figure's id (little endian) followed by the confirmation from payload
 		// Index from game begins at 1 rather than 0, so minus 1 here
 		std::array<uint8, 8> valueToEncrypt = {};
