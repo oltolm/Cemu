@@ -169,6 +169,16 @@ void wxCheckTree::UpdateCheckBoxImages()
 	Refresh();
 }
 
+void wxCheckTree::DeleteAllItems()
+{
+	last_mouse_over = {};
+	last_left_down = {};
+	last_kf = {};
+	m_colors.clear();
+	mouse_entered_tree_with_left_down = false;
+	wxTreeCtrl::DeleteAllItems();
+}
+
 void wxCheckTree::Sort(const wxTreeItemId& node, bool recursive)
 {
 	if (recursive)

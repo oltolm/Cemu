@@ -35,6 +35,7 @@ class WXDLLIMPEXP_CHECKTREE wxCheckTree : public wxTreeCtrl
 
         void Init();
 		void Sort(const wxTreeItemId& node, bool recursive);
+		void DeleteAllItems() override;
 
 		int OnCompareItems(const wxTreeItemId& item1, const wxTreeItemId& item2) override;
 
