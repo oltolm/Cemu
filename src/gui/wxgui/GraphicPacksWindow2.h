@@ -50,6 +50,7 @@ private:
 	wxButton* m_reload_shaders;
 	wxHyperlinkCtrl* m_download_from_url;
 	wxButton* m_update_graphicPacks;
+	wxButton* m_refresh_graphic_packs;
 	wxInfoBar* m_info_bar;
 
 	GraphicPackPtr m_shown_graphic_pack;
@@ -68,6 +69,7 @@ private:
 	void OnReloadShaders(wxCommandEvent& event);
 	void OnClickCustomDownload(wxCommandEvent& event);
 	void OnCheckForUpdates(wxCommandEvent& event);
+	void OnRefreshGraphicPacks(wxCommandEvent& event);
 	void OnSizeChanged(wxSizeEvent& event);
 	void SashPositionChanged(wxEvent& event);
 	void OnFilterUpdate(wxEvent& event);

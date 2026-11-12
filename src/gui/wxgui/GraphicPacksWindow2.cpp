@@ -316,6 +316,10 @@ GraphicPacksWindow2::GraphicPacksWindow2(wxWindow* parent, uint64_t title_id_fil
 		m_update_graphicPacks->Bind(wxEVT_BUTTON, &GraphicPacksWindow2::OnCheckForUpdates, this);
 		row->Add(m_update_graphicPacks, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
+		m_refresh_graphic_packs = new wxButton(m_right_panel, wxID_ANY, _("Refresh graphic packs"));
+		m_refresh_graphic_packs->Bind(wxEVT_BUTTON, &GraphicPacksWindow2::OnRefreshGraphicPacks, this);
+		row->Add(m_refresh_graphic_packs, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+
 		m_download_from_url = new wxHyperlinkCtrl(m_right_panel, wxID_ANY, _("Or download pack from URL..."), _(""));
 		m_download_from_url->Bind(wxEVT_HYPERLINK, &GraphicPacksWindow2::OnClickCustomDownload, this);
 		row->Add(m_download_from_url, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
@@ -686,6 +690,13 @@ void GraphicPacksWindow2::OnCheckForUpdates(wxCommandEvent& event)
 	}
 }
 
+void GraphicPacksWindow2::OnRefreshGraphicPacks(wxCommandEvent& event)
+{
+	SaveStateToConfig();
+	RefreshGraphicPacks();
+	FillGraphicPackList();
+}
+
 void GraphicPacksWindow2::OnSizeChanged(wxSizeEvent& event)
 {
 	const auto obj = (wxSplitterWindow*)event.GetEventObject();
@@ -724,15 +735,18 @@ void GraphicPacksWindow2::OnInstalledGamesChanged(wxCommandEvent& event)
 void GraphicPacksWindow2::UpdateTitleRunning(bool running)
 {
 	m_update_graphicPacks->Enable(!running);
+	m_refresh_graphic_packs->Enable(!running);
 	m_download_from_url->Enable(!running);
 	if(running)
 	{
 		m_download_from_url->SetToolTip(_("Graphic packs cannot be updated while a game is running."));
 		m_update_graphicPacks->SetToolTip(_("Graphic packs cannot be updated while a game is running."));
+		m_refresh_graphic_packs->SetToolTip(_("Graphic packs cannot be refreshed while a game is running."));
 	}
 	else
 	{
 		m_update_graphicPacks->SetToolTip(nullptr);
+		m_refresh_graphic_packs->SetToolTip(nullptr);
 		m_download_from_url->SetToolTip(nullptr);
 	}
 }
